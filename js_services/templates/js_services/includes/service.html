@@ -1,0 +1,46 @@
+{% load i18n apphooks_config_tags cms_tags sekizai_tags staticfiles thumbnail %}
+
+{% page_attribute "slug" as slug %}
+
+<article class="services-service{% if service.is_featured %} services-featured{% endif %}{% if not service.published %} unpublished{% endif %}{% if service.future %} future{% endif %}">
+
+  {% if service.featured_image_id and slug != "how-to" and slug != "guides" %}
+    <header class="image" style="background-image:url({% thumbnail service.featured_image 1190x500 crop subject_location=service.featured_image.subject_location %});">
+  {% else %}
+    <header>
+  {% endif %}
+
+    <p class="section-title" title="{{ slug }}">{{ slug }}</p>
+
+    <h1>{% render_model service "title" %}</h1>
+
+  </header>
+
+    {% render_placeholder service.content language placeholder_language %}
+
+    <div class="related-services cols-layout">
+      <h3>Related services</h3>
+      <ul class="row">
+        {% for service in related_services %}
+          <li class="col-md-4">
+
+            <a href="{{ service.get_absolute_url }}">
+
+              {% if service.featured_image %}
+                {% thumbnail service.featured_image "500x300" crop="center" as im %}
+                <img src="{{ im.url }}">
+              {% endif %}
+
+              <h4>{{ service.title }}</h4>
+
+              {% if service.lead_in %}
+                <p>{{ service.lead_in|striptags|safe }}</p>
+              {% endif %}
+
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+
+</article>

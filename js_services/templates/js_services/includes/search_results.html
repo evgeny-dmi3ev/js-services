@@ -1,0 +1,27 @@
+{% extends "aldryn_newsblog/base.html" %}
+{% load i18n apphooks_config_tags %}
+
+{% block services_content %}
+    <ul>
+        <h3>{% blocktrans with query=query %}Most recent services containing "<strong>{{ query }}</strong>"{% endblocktrans %}</h3>
+        {% for service in object_list %}
+            <li{% if not service.is_published %} class="unpublished"{% endif %}>
+                <a href="{% namespace_url "service-detail" service.slug namespace=view.app_config.namespace default='' %}">
+                    <strong>
+                        {% for category in service.categories.all %}
+                            {{ category.name }}{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </strong>
+                    {{ service.title }}<br />
+                    {{ service.lead_in|striptags|truncatewords:"10"|safe }}
+                </a>
+            </li>
+        {% empty %}
+            {% if query %}
+                <p>{% blocktrans with query=query %}No services found{% endblocktrans %}</p>
+            {% else %}
+                <p>{% trans "Enter a query above" %}</p>
+            {% endif %}
+        {% endfor %}
+    </ul>
+{% endblock %}

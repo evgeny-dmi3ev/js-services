@@ -1,0 +1,20 @@
+{% extends "js_services/base.html" %}
+{% load i18n cms_tags apphooks_config_tags %}
+
+{% block title %}
+    {{ service.title }} - {{ block.super }}
+{% endblock %}
+
+{% block services_content %}
+    {% include "js_services/includes/service.html" with detail_view="true" %}
+
+    <ul>
+        {% if prev_service %}
+            <li><a href="{{ prev_service.get_absolute_url }}">{% trans "Previous Service" %}</a></li>
+        {% endif %}
+        <li><a href="{% namespace_url "service-list" %}">{% trans "Back to Overview" %}</a></li>
+        {% if next_service %}
+            <li><a href="{{ next_service.get_absolute_url }}">{% trans "Next Service" %}</a></li>
+        {% endif %}
+    </ul>
+{% endblock %}

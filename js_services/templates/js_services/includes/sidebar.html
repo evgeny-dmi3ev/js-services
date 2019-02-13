@@ -1,0 +1,69 @@
+{% load i18n cms_tags sekizai_tags %}
+
+{% if split_path|length == 1 %}
+
+    <h3>Type</h3>
+    <ul>
+        <li><a href="/{{ split_path.0 }}">Any</a></li>
+        {% for item in type_filter_list %}
+            <li><a href="/{{ split_path.0 }}/{{ item.namespace|lower|slugify }}">{{ item }}</a></li>
+        {% endfor %}
+    </ul>
+
+    <h3>Category</h3>
+    <ul>
+        <li><a href="/{{ split_path.0 }}/all">Any</a></li>
+        {% for item in category_filter_list %}
+            <li><a href="/{{ split_path.0 }}/all/{{ item.slug|lower|slugify }}">{{ item }}</a></li>
+        {% endfor %}
+    </ul>
+
+{% elif split_path|length == 2 %}
+
+    <h3>Type</h3>
+    <ul>
+        <li><a href="/{{ split_path.0 }}">Any</a></li>
+        {% for item in type_filter_list %}
+            {% if item == type_filter_active.0 %}
+            <li class="active"><a href="/{{ split_path.0 }}/{{ item.namespace|lower|slugify }}">{{ item }}</a></li>
+            {% else %}
+            <li><a href="/{{ split_path.0 }}/{{ item.namespace|lower|slugify }}">{{ item }}</a></li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+
+    <h3>Category</h3>
+    <ul>
+        <li><a href="/{{ split_path.0 }}/{{ split_path.1|slugify }}">Any</a></li>
+        {% for item in category_filter_list %}
+            <li><a href="/{{ split_path.0 }}/{{ split_path.1|slugify }}/{{ item.slug|lower|slugify }}">{{ item }}</a></li>
+        {% endfor %}
+    </ul>
+
+{% elif split_path|length == 3 %}
+
+    <h3>Type</h3>
+    <ul>
+        <li><a href="/{{ split_path.0 }}/all/{{ split_path.2|slugify }}">Any</a></li>
+        {% for item in type_filter_list %}
+            {% if item == type_filter_active.0 %}
+            <li class="active"><a href="/{{ split_path.0 }}/{{ item.namespace|lower|slugify }}/{{ split_path.2|slugify }}">{{ item }}</a></li>
+            {% else %}
+            <li><a href="/{{ split_path.0 }}/{{ item.namespace|lower|slugify }}/{{ split_path.2|slugify }}">{{ item }}</a></li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+
+    <h3>Category</h3>
+    <ul>
+        <li><a href="/{{ split_path.0 }}/{{ split_path.1|slugify }}">Any</a></li>
+        {% for item in category_filter_list %}
+            {% if item == category_filter_active.0 %}
+            <li class="active"><a href="/{{ split_path.0 }}/{{ split_path.1|slugify }}/{{ item.slug|lower|slugify }}">{{ item }}</a></li>
+            {% else %}
+            <li><a href="/{{ split_path.0 }}/{{ split_path.1|slugify }}/{{ item.slug|lower|slugify }}">{{ item }}</a></li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+
+{% endif %}

@@ -1,0 +1,19 @@
+{% load i18n apphooks_config_tags cms_tags sekizai_tags staticfiles thumbnail %}
+
+<li class="col-sm-12 col-md-6 {{ service.type_slug|lower }}">
+
+  {% if service.featured_image %}
+    {% thumbnail service.featured_image "370x223" crop="center" as im %}
+    <a href="{{ service.get_absolute_url }}" style="background-image:url({{ im.url }});">
+  {% else %}
+    <a href="{{ service.get_absolute_url }}">
+  {% endif %}
+
+    <h4>{{ service.title }}</h4>
+
+    {% if service.lead_in %}
+      <p>{{ service.lead_in|striptags|safe|truncatechars:165 }}</p>
+    {% endif %}
+
+  </a>
+</li>

@@ -1,0 +1,6 @@
+{
+    "package-name": "js-services",
+    "installed-apps": [
+        "js_services"
+    ]
+}
