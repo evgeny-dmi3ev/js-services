@@ -8,7 +8,6 @@ js_services/apps.py
 js_services/cms_appconfig.py
 js_services/cms_apps.py
 js_services/cms_menus.py
-js_services/cms_plugins.py
 js_services/cms_toolbars.py
 js_services/cms_wizards.py
 js_services/constants.py
@@ -27,6 +26,7 @@ js_services/migrations/0001_initial.py
 js_services/migrations/0002_service_related.py
 js_services/migrations/0003_auto_20190131_0651.py
 js_services/migrations/0004_auto_20190213_0944.py
+js_services/migrations/0005_auto_20190218_1237.py
 js_services/migrations/__init__.py
 js_services/templates/js_services/base.html
 js_services/templates/js_services/js_services.html

@@ -116,7 +116,7 @@ class Service(TranslatedAutoSlugifyMixin,
     #
     # https://github.com/django/django/blob/1.8.4/django/db/models/fields/related.py#L977
     related = SortedManyToManyField('self', verbose_name=_('related services'),
-                                    blank=True, symmetrical=False)
+                                    blank=True, symmetrical=True)
 
     objects = RelatedManager()
 
