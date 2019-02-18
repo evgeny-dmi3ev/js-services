@@ -146,6 +146,10 @@ class ServiceAdmin(
                 'lead_in',
             )
         }),
+        (_('Categorization'), {
+            'classes': ('collapse',),
+            'fields': advanced_settings_fields,
+        }),
         (_('Meta Options'), {
             'classes': ('collapse',),
             'fields': (
@@ -154,10 +158,6 @@ class ServiceAdmin(
                 'meta_description',
                 'meta_keywords',
             )
-        }),
-        (_('Advanced Settings'), {
-            'classes': ('collapse',),
-            'fields': advanced_settings_fields,
         }),
     )
 
