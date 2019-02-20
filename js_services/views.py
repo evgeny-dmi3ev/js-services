@@ -212,7 +212,7 @@ class ServiceDetail(AppConfigMixin, AppHookCheckMixin, PreviewModeMixin,
 
 
 class ServiceListBase(AppConfigMixin, AppHookCheckMixin, TemplatePrefixMixin,
-                      EditModeMixin, PreviewModeMixin, ViewUrlMixin, ListView):
+                      PreviewModeMixin, ViewUrlMixin, ListView):
     model = Service
     show_header = False
 
