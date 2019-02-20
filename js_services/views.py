@@ -212,9 +212,15 @@ class ServiceDetail(AppConfigMixin, AppHookCheckMixin, PreviewModeMixin,
 
 
 class ServiceListBase(AppConfigMixin, AppHookCheckMixin, TemplatePrefixMixin,
-                      PreviewModeMixin, ViewUrlMixin, ListView):
+                      EditModeMixin, PreviewModeMixin, ViewUrlMixin, ListView):
     model = Service
     show_header = False
+
+    def get_queryset(self):
+        qs = super(ArticleListBase, self).get_queryset()
+        if not self.edit_mode:
+            qs = qs.published()
+        return qs
 
     def get_paginate_by(self, queryset):
         if self.paginate_by is not None:
