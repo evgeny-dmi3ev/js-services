@@ -83,8 +83,10 @@ class Service(TranslatedAutoSlugifyMixin,
         search_data=models.TextField(blank=True, editable=False)
     )
 
-    content = PlaceholderField('newsblog_service_content',
-                               related_name='newsblog_service_content')
+    content = PlaceholderField('service_content',
+                               related_name='service_content')
+    sidebar = PlaceholderField('service_sidebar',
+                               related_name='service_sidebar')
     app_config = AppHookConfigField(
         ServicesConfig,
         verbose_name=_('Section'),
@@ -219,7 +221,7 @@ class Service(TranslatedAutoSlugifyMixin,
         super(Service, self).save(*args, **kwargs)
 
     def __str__(self):
-        return self.safe_translation_getter('title', any_language=True)
+        return self.safe_translation_getter('title', any_language=True) if self.pk else ''
 
 
 @receiver(post_save, dispatch_uid='service_update_search_data')
