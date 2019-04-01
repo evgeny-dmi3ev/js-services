@@ -120,6 +120,9 @@ class Service(TranslatedAutoSlugifyMixin,
     related = SortedManyToManyField('self', verbose_name=_('related services'),
                                     blank=True, symmetrical=True)
 
+    companies = SortedManyToManyField('js_companies.Company',
+         verbose_name=_('companies'), blank=True)
+
     objects = RelatedManager()
 
     class Meta:

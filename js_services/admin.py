@@ -61,6 +61,7 @@ class ServiceAdminForm(TranslatableModelForm):
         fields = [
             'app_config',
             'categories',
+            'companies',
             'featured_image',
             'is_featured',
             'is_published',
@@ -116,6 +117,7 @@ class ServiceAdmin(
     list_filter = [
         'app_config',
         'categories',
+        'companies',
     ]
     actions = (
         make_featured, make_not_featured,
@@ -132,6 +134,7 @@ class ServiceAdmin(
         )
 
     advanced_settings_fields += (
+        'companies',
         'app_config',
     )
 
@@ -175,6 +178,8 @@ class ServiceAdmin(
     def formfield_for_manytomany(self, db_field, request=None, **kwargs):
         if db_field.name == 'related' and SERVICES_HIDE_RELATED_SERVICES == 0:
             kwargs['widget'] = SortedFilteredSelectMultiple(attrs={'verbose_name': 'service', 'verbose_name_plural': 'related services'})
+        if db_field.name == 'companies':
+            kwargs['widget'] = SortedFilteredSelectMultiple()
         return super(ServiceAdmin, self).formfield_for_manytomany(db_field, request, **kwargs)
 
 
