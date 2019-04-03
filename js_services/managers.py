@@ -17,13 +17,16 @@ from aldryn_apphooks_config.managers.base import ManagerMixin, QuerySetMixin
 from parler.managers import TranslatableManager, TranslatableQuerySet
 
 
-class ServiceQuerySet(QuerySetMixin, TranslatableQuerySet):
+class ServiceQuerySet(TranslatableQuerySet):
     def published(self):
         """
         Returns Services that are published AND have a publishing_date that
         has actually passed.
         """
         return self.filter(is_published=True, publishing_date__lte=now())
+
+    def namespace(self, namespace, to=None):
+        return self.filter(**{'sections__namespace': namespace})
 
 
 class RelatedManager(ManagerMixin, TranslatableManager):

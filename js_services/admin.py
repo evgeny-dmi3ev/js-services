@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import copy
 from aldryn_apphooks_config.admin import BaseAppHookConfig, ModelAppHookConfig
 from aldryn_people.models import Person
 from aldryn_translation_tools.admin import AllTranslationsMixin
@@ -59,7 +60,6 @@ class ServiceAdminForm(TranslatableModelForm):
     class Meta:
         model = models.Service
         fields = [
-            'app_config',
             'categories',
             'companies',
             'featured_image',
@@ -69,6 +69,7 @@ class ServiceAdminForm(TranslatableModelForm):
             'meta_description',
             'meta_keywords',
             'meta_title',
+            'sections',
             'slug',
             'related',
             'title',
@@ -78,12 +79,12 @@ class ServiceAdminForm(TranslatableModelForm):
         super(ServiceAdminForm, self).__init__(*args, **kwargs)
 
         qs = models.Service.objects
-        if self.instance.app_config_id:
-            qs = models.Service.objects.filter(
-                app_config=self.instance.app_config)
-        elif 'initial' in kwargs and 'app_config' in kwargs['initial']:
-            qs = models.Service.objects.filter(
-                app_config=kwargs['initial']['app_config'])
+        #if self.instance.app_config_id:
+            #qs = models.Service.objects.filter(
+                #app_config=self.instance.app_config)
+        #elif 'initial' in kwargs and 'app_config' in kwargs['initial']:
+            #qs = models.Service.objects.filter(
+                #app_config=kwargs['initial']['app_config'])
 
         if self.instance.pk:
             qs = qs.exclude(pk=self.instance.pk)
@@ -93,7 +94,7 @@ class ServiceAdminForm(TranslatableModelForm):
 
         # Don't allow app_configs to be added here. The correct way to add an
         # apphook-config is to create an apphook on a cms Page.
-        self.fields['app_config'].widget.can_add_related = False
+        #self.fields['app_config'].widget.can_add_related = False
         # Don't allow related articles to be added here.
         # doesn't makes much sense to add articles from another article other
         # than save and add another.
@@ -111,11 +112,12 @@ class ServiceAdmin(
     ModelAppHookConfig,
     TranslatableAdmin
 ):
+    app_config_attribute = 'sections'
     form = ServiceAdminForm
-    list_display = ('title', 'app_config', 'slug', 'is_featured',
+    list_display = ('title', 'slug', 'is_featured',
                     'is_published')
     list_filter = [
-        'app_config',
+        'sections',
         'categories',
         'companies',
     ]
@@ -135,7 +137,7 @@ class ServiceAdmin(
 
     advanced_settings_fields += (
         'companies',
-        'app_config',
+        'sections',
     )
 
     fieldsets = (
@@ -168,6 +170,7 @@ class ServiceAdmin(
 
     filter_horizontal = [
         'categories',
+        'sections',
     ]
     app_config_values = {
         'default_published': 'is_published'
@@ -179,9 +182,11 @@ class ServiceAdmin(
         if db_field.name == 'related' and SERVICES_HIDE_RELATED_SERVICES == 0:
             kwargs['widget'] = SortedFilteredSelectMultiple(attrs={'verbose_name': 'service', 'verbose_name_plural': 'related services'})
         if db_field.name == 'companies':
-            kwargs['widget'] = SortedFilteredSelectMultiple()
+            kwargs['widget'] = SortedFilteredSelectMultiple(attrs={'verbose_name': 'company', 'verbose_name_plural': 'companies'})
         return super(ServiceAdmin, self).formfield_for_manytomany(db_field, request, **kwargs)
 
+    def get_form(self, request, obj=None, **kwargs):
+        return super(TranslatableAdmin, self).get_form(request, obj, **kwargs)
 
 admin.site.register(models.Service, ServiceAdmin)
 

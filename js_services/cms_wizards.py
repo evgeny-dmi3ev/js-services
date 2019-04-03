@@ -84,10 +84,10 @@ class CreateServicesServiceForm(BaseFormMixin, TranslatableModelForm):
 
     class Meta:
         model = Service
-        fields = ['title', 'app_config']
+        fields = ['title', 'sections']
         # The natural widget for app_config is meant for normal Admin views and
         # contains JS to refresh the page on change. This is not wanted here.
-        widgets = {'app_config': forms.Select()}
+        widgets = {'sections': forms.Select()}
 
     def __init__(self, **kwargs):
         super(CreateServicesServiceForm, self).__init__(**kwargs)
@@ -96,8 +96,8 @@ class CreateServicesServiceForm(BaseFormMixin, TranslatableModelForm):
         # app_config choice field, we'll choose the option for the user.
         app_configs = get_published_app_configs()
         if len(app_configs) < 2:
-            self.fields['app_config'].widget = forms.HiddenInput()
-            self.fields['app_config'].initial = app_configs[0].pk
+            self.fields['sections'].widget = forms.HiddenInput()
+            self.fields['sections'].initial = app_configs[0].pk
 
     def save(self, commit=True):
         service = super(CreateServicesServiceForm, self).save(commit=False)

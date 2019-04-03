@@ -87,10 +87,15 @@ class Service(TranslatedAutoSlugifyMixin,
                                related_name='service_content')
     sidebar = PlaceholderField('service_sidebar',
                                related_name='service_sidebar')
-    app_config = AppHookConfigField(
+    #app_config = AppHookConfigField(
+        #ServicesConfig,
+        #verbose_name=_('Section'),
+        #help_text='',
+    #)
+    sections = models.ManyToManyField(
         ServicesConfig,
-        verbose_name=_('Section'),
-        help_text='',
+        verbose_name=_('Sections'),
+        related_name='services',
     )
     categories = CategoryManyToManyField(Category,
                                          verbose_name=_('categories'),
@@ -131,6 +136,10 @@ class Service(TranslatedAutoSlugifyMixin,
     def get_class(self):
         '''Return class name'''
         return self.__class__.__name__
+
+    @property
+    def app_config(self):
+        return self.sections.all()[0] if self.sections.count() else ServicesConfig()
 
     @property
     def type(self):
