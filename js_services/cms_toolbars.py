@@ -106,13 +106,13 @@ class ServicesToolbar(CMSToolbar):
             if change_service_perm:
                 url_args = {}
                 if config:
-                    url_args = {'app_config__id__exact': config.pk}
+                    url_args = {'sections__id__exact': config.pk}
                 url = get_admin_url('js_services_service_changelist',
                                     **url_args)
                 menu.add_sideframe_item(_('Service list'), url=url)
 
             if add_service_perm:
-                url_args = {'app_config': config.pk, 'owner': user.pk, }
+                url_args = {'sections': config.pk, 'owner': user.pk, }
                 if language:
                     url_args.update({'language': language, })
                 url = get_admin_url('js_services_service_add', **url_args)
