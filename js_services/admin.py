@@ -183,6 +183,8 @@ class ServiceAdmin(
             kwargs['widget'] = SortedFilteredSelectMultiple(attrs={'verbose_name': 'service', 'verbose_name_plural': 'related services'})
         if db_field.name == 'companies':
             kwargs['widget'] = SortedFilteredSelectMultiple(attrs={'verbose_name': 'company', 'verbose_name_plural': 'companies'})
+        if db_field.name == 'sections':
+            kwargs["queryset"] = models.ServicesConfig.objects.exclude(namespace=models.ServicesConfig.default_namespace)
         return super(ServiceAdmin, self).formfield_for_manytomany(db_field, request, **kwargs)
 
     def get_form(self, request, obj=None, **kwargs):

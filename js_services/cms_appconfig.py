@@ -105,6 +105,10 @@ class ServicesConfig(TranslatableModel, AppHookConfig):
     def __str__(self):
         return self.safe_translation_getter('app_title')
 
+    default_namespace = 'all-services'
+    default_app_title = 'All services'
+
+
 
 class ServicesConfigForm(AppDataForm):
     default_published = forms.BooleanField(

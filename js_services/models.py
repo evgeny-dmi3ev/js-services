@@ -139,7 +139,10 @@ class Service(TranslatedAutoSlugifyMixin,
 
     @property
     def app_config(self):
-        return self.sections.all()[0] if self.sections.count() else ServicesConfig()
+        try:
+            return ServicesConfig.objects.get(namespace=ServicesConfig.default_namespace)
+        except:
+            return self.sections.all()[0] if self.sections.count() else ServicesConfig()
 
     @property
     def type(self):
