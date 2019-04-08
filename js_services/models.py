@@ -140,7 +140,7 @@ class Service(TranslatedAutoSlugifyMixin,
     @property
     def app_config(self):
         try:
-            reverse('{0}service-list'.format(ServicesConfig.default_namespace))
+            reverse('{0}:service-list'.format(ServicesConfig.default_namespace))
             return ServicesConfig.objects.get(namespace=ServicesConfig.default_namespace)
         except:
             return self.sections.all()[0]
