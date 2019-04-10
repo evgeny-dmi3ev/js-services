@@ -25,6 +25,8 @@ from filer.fields.image import FilerImageField
 from parler.models import TranslatableModel, TranslatedFields
 from aldryn_newsblog.utils import get_plugin_index_data, get_request, strip_tags
 from aldryn_newsblog.models import Article, NewsBlogConfig
+from aldryn_people.models import Person
+
 
 from .cms_appconfig import ServicesConfig
 from .managers import RelatedManager
@@ -249,6 +251,12 @@ class Service(TranslatedAutoSlugifyMixin,
         if service_category:
             return Service.objects.published().filter(sections__namespace=service_category)
         return Service.objects.published()
+
+    def people(self):
+        return Person.objects.published().filter(services=self)
+
+    def related_people(self):
+        return Person.objects.published().filter(services__in=self.related.all()).distinct()
 
 
     def __getattr__(cls, name):
