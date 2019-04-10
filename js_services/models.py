@@ -24,6 +24,7 @@ from sortedm2m.fields import SortedManyToManyField
 from filer.fields.image import FilerImageField
 from parler.models import TranslatableModel, TranslatedFields
 from aldryn_newsblog.utils import get_plugin_index_data, get_request, strip_tags
+from aldryn_newsblog.models import Article, NewsBlogConfig
 
 from .cms_appconfig import ServicesConfig
 from .managers import RelatedManager
@@ -238,6 +239,33 @@ class Service(TranslatedAutoSlugifyMixin,
 
     def __str__(self):
         return self.safe_translation_getter('title', any_language=True) if self.pk else ''
+
+    def related_articles(self, article_category=None):
+        if article_category:
+            return Article.objects.published().filter(services__in=self.related.all(), app_config__namespace=article_category).distinct()
+        return Article.objects.published().filter(services__in=self.related.all()).distinct()
+
+    def services(self, service_category=None):
+        if service_category:
+            return Service.objects.published().filter(sections__namespace=service_category)
+        return Service.objects.published()
+
+
+    def __getattr__(cls, name):
+        if not hasattr(Service, name):
+            if name.startswith('related_articles_'):
+                category = name.split('related_articles_')[1].replace('_', '-')
+                def wrapper(self):
+                    return self.related_articles(category)
+                setattr(Service, name, wrapper)
+                return getattr(cls, name)
+            if name.startswith('services_'):
+                category = name.split('services_')[1].replace('_', '-')
+                def wrapper(self):
+                    return self.services(category)
+                setattr(Service, name, wrapper)
+                return getattr(cls, name)
+        raise AttributeError
 
 
 @receiver(post_save, dispatch_uid='service_update_search_data')
