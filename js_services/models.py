@@ -242,10 +242,22 @@ class Service(TranslatedAutoSlugifyMixin,
     def __str__(self):
         return self.safe_translation_getter('title', any_language=True) if self.pk else ''
 
+    def services_by_category(self, category=None):
+        if category:
+            categories = Category.objects.filter(translations__slug=category)
+            return Service.objects.published().filter(categories__in=categories[0].get_descendants()).distinct().exclude(pk=self.pk) if categories.count() else []
+        return Service.objects.published().exclude(pk=self.pk)
+
+    def related_categories(self, category=None):
+        if category:
+            categories = Category.objects.filter(translations__slug=category)
+            return categories[0].get_descendants().filter(pk__in=self.categories.all()) if categories.count() else []
+        return self.categories.all()
+
     def related_articles(self, article_category=None):
         if article_category:
-            return Article.objects.published().filter(services__in=self.related.all(), app_config__namespace=article_category).distinct()
-        return Article.objects.published().filter(services__in=self.related.all()).distinct()
+            return Article.objects.published().filter(services=self, app_config__namespace=article_category)
+        return Article.objects.published().filter(services=self)
 
     def services(self, service_category=None):
         if service_category:
@@ -267,7 +279,19 @@ class Service(TranslatedAutoSlugifyMixin,
                     return self.related_articles(category)
                 setattr(Service, name, wrapper)
                 return getattr(cls, name)
-            if name.startswith('services_'):
+            elif name.startswith('services_by_category_'):
+                category = name.split('services_by_category_')[1].replace('_', '-')
+                def wrapper(self):
+                    return self.services_by_category(category)
+                setattr(Service, name, wrapper)
+                return getattr(cls, name)
+            elif name.startswith('related_categories_'):
+                category = name.split('related_categories_')[1].replace('_', '-')
+                def wrapper(self):
+                    return self.related_categories(category)
+                setattr(Service, name, wrapper)
+                return getattr(cls, name)
+            elif name.startswith('services_'):
                 category = name.split('services_')[1].replace('_', '-')
                 def wrapper(self):
                     return self.services(category)

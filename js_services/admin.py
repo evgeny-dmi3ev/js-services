@@ -206,5 +206,7 @@ class ServicesConfigAdmin(
             'pagination_pages_visible', 'exclude_featured',
             'search_indexed', 'config.default_published',)
 
+    #def get_readonly_fields(self, request, obj=None):
+        #return self.readonly_fields
 
 admin.site.register(models.ServicesConfig, ServicesConfigAdmin)
