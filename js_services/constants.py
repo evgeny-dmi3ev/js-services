@@ -12,3 +12,13 @@ SERVICES_SUMMARY_RICHTEXT = getattr(
     'SERVICES_SUMMARY_RICHTEXT',
     False,
 )
+SERVICES_ENABLE_PUBDATE = getattr(
+    settings,
+    'SERVICES_ENABLE_PUBDATE',
+    False,
+)
+SERVICES_ENABLE_IMAGE = getattr(
+    settings,
+    'SERVICES_ENABLE_IMAGE',
+    True,
+)

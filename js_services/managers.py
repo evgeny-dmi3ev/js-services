@@ -16,6 +16,7 @@ from django.utils.timezone import now
 from aldryn_apphooks_config.managers.base import ManagerMixin, QuerySetMixin
 from parler.managers import TranslatableManager, TranslatableQuerySet
 
+from .constants import SERVICES_ENABLE_PUBDATE, SERVICES_ENABLE_IMAGE
 
 class ServiceQuerySet(TranslatableQuerySet):
     def published(self):
@@ -23,7 +24,10 @@ class ServiceQuerySet(TranslatableQuerySet):
         Returns Services that are published AND have a publishing_date that
         has actually passed.
         """
-        return self.filter(is_published=True, publishing_date__lte=now())
+        if SERVICES_ENABLE_PUBDATE:
+            return self.filter(is_published=True, publishing_date__lte=now())
+        return self.filter(is_published=True)
+
 
     def namespace(self, namespace, to=None):
         return self.filter(**{'sections__namespace': namespace})
@@ -32,7 +36,9 @@ class ServiceQuerySet(TranslatableQuerySet):
 class RelatedManager(ManagerMixin, TranslatableManager):
     def get_queryset(self):
         qs = ServiceQuerySet(self.model, using=self.db)
-        return qs.select_related('featured_image')
+        if SERVICES_ENABLE_IMAGE:
+            return qs.select_related('featured_image')
+        return qs
 
     def published(self):
         return self.get_queryset().published()

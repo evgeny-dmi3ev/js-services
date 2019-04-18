@@ -17,7 +17,9 @@ from . import models
 
 from .constants import (
     SERVICES_SUMMARY_RICHTEXT,
-    SERVICES_HIDE_RELATED_SERVICES
+    SERVICES_HIDE_RELATED_SERVICES,
+    SERVICES_ENABLE_PUBDATE,
+    SERVICES_ENABLE_IMAGE,
 )
 
 from cms.admin.placeholderadmin import PlaceholderAdminMixin
@@ -103,6 +105,9 @@ class ServiceAdminForm(TranslatableModelForm):
             self.fields['related'].widget.can_add_related = False
         if not SERVICES_SUMMARY_RICHTEXT:
             self.fields['lead_in'].widget = widgets.Textarea()
+        self.fields['lead_in'].help_text = """The Summary gives the reader
+         the main idea of the service, this is useful in overviews, lists or
+         as an introduction to your service."""
 
 
 class ServiceAdmin(
@@ -127,6 +132,24 @@ class ServiceAdmin(
     )
 
 
+    settings_fields = (
+        'title',
+        'is_published',
+        'is_featured',
+    )
+    if SERVICES_ENABLE_PUBDATE:
+        settings_fields += (
+            'publishing_date',
+        )
+    if SERVICES_ENABLE_IMAGE:
+        settings_fields += (
+            'featured_image',
+        )
+    settings_fields += (
+        'lead_in',
+    )
+
+
     advanced_settings_fields = (
         'categories',
     )
@@ -142,16 +165,9 @@ class ServiceAdmin(
 
     fieldsets = (
         (None, {
-            'fields': (
-                'title',
-                'publishing_date',
-                'is_published',
-                'is_featured',
-                'featured_image',
-                'lead_in',
-            )
+            'fields': settings_fields
         }),
-        (_('Categorization'), {
+        (_('Categorisation'), {
             'classes': ('collapse',),
             'fields': advanced_settings_fields,
         }),

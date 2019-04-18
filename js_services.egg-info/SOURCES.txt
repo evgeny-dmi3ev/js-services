@@ -27,6 +27,9 @@ js_services/migrations/0002_service_related.py
 js_services/migrations/0003_auto_20190131_0651.py
 js_services/migrations/0004_auto_20190213_0944.py
 js_services/migrations/0005_auto_20190218_1237.py
+js_services/migrations/0006_auto_20190326_1107.py
+js_services/migrations/0007_service_companies.py
+js_services/migrations/0008_service_sections.py
 js_services/migrations/__init__.py
 js_services/templates/js_services/base.html
 js_services/templates/js_services/js_services.html
