@@ -1,0 +1,24 @@
+{% load cms_tags i18n thumbnail %}
+
+<div class="related-services two-by-two">
+
+  {% if title %}
+    <h3 class="title">
+      {% if image %}
+        {% thumbnail image "40x40" crop="center" as im %}
+          <img src="{{ im.url }}" alt="{{ object.image_alt }}" class="img-responsive media-object">
+      {% elif icon %}
+         {% with icon_class=icon instance=icon %}{% include "djangocms_icon/includes/icon.html" %}{% endwith %}
+      {% endif %}
+      {{ title }}
+    </h3>
+  {% endif %}
+
+  <ul class="row">
+    {% for service in related_services %}
+        {% include "js_services/includes/service-item.html" with service=service %}
+    {% empty %}
+        <li class="col-md-6">{% trans "No related services found" %}</li>
+    {% endfor %}
+  </ul>
+</div>

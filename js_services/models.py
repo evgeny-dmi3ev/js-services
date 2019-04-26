@@ -22,6 +22,7 @@ from django.utils.translation import override, ugettext
 from djangocms_text_ckeditor.fields import HTMLField
 from sortedm2m.fields import SortedManyToManyField
 from filer.fields.image import FilerImageField
+from djangocms_icon.fields import Icon
 from parler.models import TranslatableModel, TranslatedFields
 from aldryn_newsblog.utils import get_plugin_index_data, get_request, strip_tags
 from aldryn_newsblog.models import Article, NewsBlogConfig
@@ -298,6 +299,36 @@ class Service(TranslatedAutoSlugifyMixin,
                 setattr(Service, name, wrapper)
                 return getattr(cls, name)
         raise AttributeError
+
+
+@python_2_unicode_compatible
+class RelatedServicesPlugin(CMSPlugin):
+
+    # NOTE: This one does NOT subclass NewsBlogCMSPlugin. This is because this
+    # plugin can really only be placed on the article detail view in an apphook.
+    cmsplugin_ptr = models.OneToOneField(
+        CMSPlugin, related_name='+', parent_link=True)
+
+    title = models.CharField(max_length=255, blank=True, verbose_name=_('Title'))
+    icon = Icon(blank=False, default='fa-')
+    image = FilerImageField(null=True, blank=True, related_name='+')
+    count = models.PositiveSmallIntegerField(verbose_name=_('Number services'))
+    layout = models.CharField(max_length=30, verbose_name=_('layout'))
+    related_services = SortedManyToManyField('js_services.Service', verbose_name=_('related services'), blank=True, symmetrical=False)
+    related_sections = SortedManyToManyField(ServicesConfig, verbose_name=_('related sections'), blank=True, symmetrical=False)
+    related_people = SortedManyToManyField(Person, verbose_name=_('key people'), blank=True, symmetrical=False)
+    related_companies = SortedManyToManyField('js_companies.Company', verbose_name=_('related companies'), blank=True, symmetrical=False)
+    related_categories = SortedManyToManyField('aldryn_categories.Category', verbose_name=_('related categories'), blank=True, symmetrical=False)
+
+    def copy_relations(self, oldinstance):
+        self.related_services = oldinstance.related_services.all()
+        self.related_sections = oldinstance.related_sections.all()
+        self.related_people = oldinstance.related_people.all()
+        self.related_companies = oldinstance.related_companies.all()
+        self.related_categories = oldinstance.related_categories.all()
+
+    def __str__(self):
+        return str(self.pk)
 
 
 @receiver(post_save, dispatch_uid='service_update_search_data')

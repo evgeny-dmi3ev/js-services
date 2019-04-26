@@ -18,6 +18,9 @@ class Form(forms.BaseForm):
         "Enable Featured image",
         required=False,
         initial=True)
+    related_templates = forms.CharField(
+        'Related services templates, comma separated', required=False
+    )
 
     def to_settings(self, data, settings):
 
@@ -29,5 +32,7 @@ class Form(forms.BaseForm):
             settings['SERVICES_ENABLE_PUBDATE'] = int(data['enable_pubdate'])
         if data['enable_image']:
             settings['SERVICES_ENABLE_IMAGE'] = int(data['enable_image'])
+        if data['related_templates']:
+            settings['SERVICES_RELATED_SERVICES_LAYOUTS'] = data['related_templates'].split(',')
 
         return settings

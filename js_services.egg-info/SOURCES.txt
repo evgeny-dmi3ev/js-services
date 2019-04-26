@@ -8,10 +8,12 @@ js_services/apps.py
 js_services/cms_appconfig.py
 js_services/cms_apps.py
 js_services/cms_menus.py
+js_services/cms_plugins.py
 js_services/cms_toolbars.py
 js_services/cms_wizards.py
 js_services/constants.py
 js_services/feeds.py
+js_services/forms.py
 js_services/managers.py
 js_services/models.py
 js_services/search_indexes.py
@@ -30,6 +32,7 @@ js_services/migrations/0005_auto_20190218_1237.py
 js_services/migrations/0006_auto_20190326_1107.py
 js_services/migrations/0007_service_companies.py
 js_services/migrations/0008_service_sections.py
+js_services/migrations/0009_relatedservicesplugin.py
 js_services/migrations/__init__.py
 js_services/templates/js_services/base.html
 js_services/templates/js_services/js_services.html
@@ -40,3 +43,4 @@ js_services/templates/js_services/includes/search_results.html
 js_services/templates/js_services/includes/service-item.html
 js_services/templates/js_services/includes/service.html
 js_services/templates/js_services/includes/sidebar.html
+js_services/templates/js_services/plugins/related_services.html
