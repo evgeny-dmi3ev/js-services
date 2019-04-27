@@ -23,6 +23,7 @@ from djangocms_text_ckeditor.fields import HTMLField
 from sortedm2m.fields import SortedManyToManyField
 from filer.fields.image import FilerImageField
 from djangocms_icon.fields import Icon
+from js_color_picker.fields import RGBColorField
 from parler.models import TranslatableModel, TranslatedFields
 from aldryn_newsblog.utils import get_plugin_index_data, get_request, strip_tags
 from aldryn_newsblog.models import Article, NewsBlogConfig
@@ -314,6 +315,9 @@ class RelatedServicesPlugin(CMSPlugin):
     image = FilerImageField(null=True, blank=True, related_name='+')
     count = models.PositiveSmallIntegerField(verbose_name=_('Number services'))
     layout = models.CharField(max_length=30, verbose_name=_('layout'))
+    background_color = RGBColorField(verbose_name=_('Background Color'),
+        blank=True, null=True)
+    full_screen = models.BooleanField(_('Show full screen'), default=False)
     related_services = SortedManyToManyField('js_services.Service', verbose_name=_('related services'), blank=True, symmetrical=False)
     related_sections = SortedManyToManyField(ServicesConfig, verbose_name=_('related sections'), blank=True, symmetrical=False)
     related_people = SortedManyToManyField(Person, verbose_name=_('key people'), blank=True, symmetrical=False)

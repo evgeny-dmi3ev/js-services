@@ -27,6 +27,8 @@ class RelatedServicesPlugin(CMSPluginBase):
         context['title'] = instance.title
         context['icon'] = instance.icon
         context['image'] = instance.image
+        context['background_color'] = instance.background_color
+        context['full_screen'] = instance.full_screen
 
         qs = instance.related_services.published()
         related_sections = instance.related_sections.all()
