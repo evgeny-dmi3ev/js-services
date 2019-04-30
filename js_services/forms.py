@@ -8,8 +8,12 @@ from django.utils.safestring import mark_safe
 from sortedm2m_filter_horizontal_widget.forms import SortedFilteredSelectMultiple, SortedMultipleChoiceField
 from aldryn_categories.models import Category
 from aldryn_people.models import Person
-from js_companies.models import Company
 from . import models
+from .constants import (
+    IS_THERE_COMPANIES,
+)
+if IS_THERE_COMPANIES:
+    from js_companies.models import Company
 
 RELATED_LAYOUTS = getattr(
     settings,
@@ -40,18 +44,21 @@ class RelatedServicesPluginForm(forms.ModelForm):
         required=False,
         widget=FilteredSelectMultiple('people', False)
     )
-    related_companies = forms.ModelMultipleChoiceField(
-        queryset=Company.objects.all(),
-        required=False,
-        widget=FilteredSelectMultiple('companies', False)
-    )
     related_categories = forms.ModelMultipleChoiceField(
         queryset=Category.objects.all(),
         required=False,
         widget=FilteredSelectMultiple('categories', False)
     )
+    related_companies = forms.CharField()
 
     def __init__(self, *args, **kwargs):
         super(RelatedServicesPluginForm, self).__init__(*args, **kwargs)
         if len(RELATED_LAYOUTS) == 0:
             self.fields['layout'].widget = forms.HiddenInput()
+        if IS_THERE_COMPANIES:
+            self.fields['related_companies'] = forms.ModelMultipleChoiceField(queryset=Company.objects.all(), required=False)
+            self.fields['related_companies'].widget = SortedFilteredSelectMultiple()
+            self.fields['related_companies'].queryset = Company.objects.all()
+            self.fields['related_companies'].initial = self.instance.related_companies.all()
+        else:
+            del self.fields['related_companies']

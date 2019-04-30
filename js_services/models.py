@@ -32,6 +32,9 @@ from aldryn_people.models import Person
 
 from .cms_appconfig import ServicesConfig
 from .managers import RelatedManager
+from .constants import (
+    IS_THERE_COMPANIES,
+)
 
 try:
     from django.utils.encoding import force_unicode
@@ -129,9 +132,6 @@ class Service(TranslatedAutoSlugifyMixin,
     # https://github.com/django/django/blob/1.8.4/django/db/models/fields/related.py#L977
     related = SortedManyToManyField('self', verbose_name=_('related services'),
                                     blank=True, symmetrical=True)
-
-    companies = SortedManyToManyField('js_companies.Company',
-         verbose_name=_('companies'), blank=True)
 
     objects = RelatedManager()
 
@@ -321,15 +321,15 @@ class RelatedServicesPlugin(CMSPlugin):
     related_services = SortedManyToManyField('js_services.Service', verbose_name=_('related services'), blank=True, symmetrical=False)
     related_sections = SortedManyToManyField(ServicesConfig, verbose_name=_('related sections'), blank=True, symmetrical=False)
     related_people = SortedManyToManyField(Person, verbose_name=_('key people'), blank=True, symmetrical=False)
-    related_companies = SortedManyToManyField('js_companies.Company', verbose_name=_('related companies'), blank=True, symmetrical=False)
     related_categories = SortedManyToManyField('aldryn_categories.Category', verbose_name=_('related categories'), blank=True, symmetrical=False)
 
     def copy_relations(self, oldinstance):
         self.related_services = oldinstance.related_services.all()
         self.related_sections = oldinstance.related_sections.all()
         self.related_people = oldinstance.related_people.all()
-        self.related_companies = oldinstance.related_companies.all()
         self.related_categories = oldinstance.related_categories.all()
+        if IS_THERE_COMPANIES:
+            self.related_companies = oldinstance.related_companies.all()
 
     def __str__(self):
         return str(self.pk)

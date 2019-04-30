@@ -8,6 +8,7 @@ from aldryn_translation_tools.admin import AllTranslationsMixin
 from cms.admin.placeholderadmin import FrontendEditableAdminMixin
 from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _
+from django import forms
 from django.forms import widgets
 from parler.admin import TranslatableAdmin
 from parler.forms import TranslatableModelForm
@@ -20,7 +21,10 @@ from .constants import (
     SERVICES_HIDE_RELATED_SERVICES,
     SERVICES_ENABLE_PUBDATE,
     SERVICES_ENABLE_IMAGE,
+    IS_THERE_COMPANIES,
 )
+if IS_THERE_COMPANIES:
+    from js_companies.models import Company
 
 from cms.admin.placeholderadmin import PlaceholderAdminMixin
 
@@ -58,24 +62,11 @@ make_not_featured.short_description = _(
 
 
 class ServiceAdminForm(TranslatableModelForm):
+    companies = forms.CharField()
 
     class Meta:
         model = models.Service
-        fields = [
-            'categories',
-            'companies',
-            'featured_image',
-            'is_featured',
-            'is_published',
-            'lead_in',
-            'meta_description',
-            'meta_keywords',
-            'meta_title',
-            'sections',
-            'slug',
-            'related',
-            'title',
-        ]
+        fields = '__all__'
 
     def __init__(self, *args, **kwargs):
         super(ServiceAdminForm, self).__init__(*args, **kwargs)
@@ -108,6 +99,13 @@ class ServiceAdminForm(TranslatableModelForm):
         self.fields['lead_in'].help_text = """The Summary gives the reader
          the main idea of the service, this is useful in overviews, lists or
          as an introduction to your service."""
+        if IS_THERE_COMPANIES:
+            self.fields['companies'] = forms.ModelMultipleChoiceField(queryset=Company.objects.all(), required=False)# self.instance.companies
+            self.fields['companies'].widget = SortedFilteredSelectMultiple()
+            self.fields['companies'].queryset = Company.objects.all()
+            self.fields['companies'].initial = self.instance.companies.all()
+        else:
+            del self.fields['companies']
 
 
 class ServiceAdmin(
@@ -124,7 +122,6 @@ class ServiceAdmin(
     list_filter = [
         'sections',
         'categories',
-        'companies',
     ]
     actions = (
         make_featured, make_not_featured,
@@ -159,9 +156,12 @@ class ServiceAdmin(
         )
 
     advanced_settings_fields += (
-        'companies',
         'sections',
     )
+    if IS_THERE_COMPANIES:
+        advanced_settings_fields += (
+            'companies',
+        )
 
     fieldsets = (
         (None, {
@@ -205,6 +205,12 @@ class ServiceAdmin(
 
     def get_form(self, request, obj=None, **kwargs):
         return super(TranslatableAdmin, self).get_form(request, obj, **kwargs)
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        if IS_THERE_COMPANIES:
+            obj.companies = Company.objects.filter(pk__in=form.cleaned_data.get('companies'))
+
 
 admin.site.register(models.Service, ServiceAdmin)
 

@@ -10,6 +10,11 @@ from cms.plugin_base import CMSPluginBase
 from cms.plugin_pool import plugin_pool
 
 from js_services import models, forms
+from .constants import (
+    IS_THERE_COMPANIES,
+)
+if IS_THERE_COMPANIES:
+    from js_companies.models import Company
 
 
 @plugin_pool.register_plugin
@@ -33,7 +38,8 @@ class RelatedServicesPlugin(CMSPluginBase):
         qs = instance.related_services.published()
         related_sections = instance.related_sections.all()
         related_people = instance.related_people.all()
-        related_companies = instance.related_companies.all()
+        if IS_THERE_COMPANIES:
+            related_companies = instance.related_companies.all()
         related_categories = instance.related_categories.all()
 
         if not qs.exists():
@@ -42,7 +48,7 @@ class RelatedServicesPlugin(CMSPluginBase):
                 qs = qs.filter(sections=related_sections)
             if related_people.exists():
                 qs = qs.filter(person_set=related_people)
-            if related_companies.exists():
+            if IS_THERE_COMPANIES and related_companies.exists():
                 qs = qs.filter(companies=related_companies)
             if related_categories.exists():
                 qs = qs.filter(services__in=related_categories)
@@ -60,3 +66,8 @@ class RelatedServicesPlugin(CMSPluginBase):
             except TemplateDoesNotExist:
                 pass
         return self.render_template
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        if IS_THERE_COMPANIES:
+            obj.related_companies = Company.objects.filter(pk__in=form.cleaned_data.get('related_companies'))

@@ -22,3 +22,8 @@ SERVICES_ENABLE_IMAGE = getattr(
     'SERVICES_ENABLE_IMAGE',
     True,
 )
+try:
+    IS_THERE_COMPANIES = True
+    from js_companies.models import Company
+except ImportError:
+    IS_THERE_COMPANIES = False
