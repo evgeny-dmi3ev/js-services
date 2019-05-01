@@ -59,6 +59,7 @@ class RelatedServicesPluginForm(forms.ModelForm):
             self.fields['related_companies'] = forms.ModelMultipleChoiceField(queryset=Company.objects.all(), required=False)
             self.fields['related_companies'].widget = SortedFilteredSelectMultiple()
             self.fields['related_companies'].queryset = Company.objects.all()
-            self.fields['related_companies'].initial = self.instance.related_companies.all()
+            if self.instance.pk and self.instance.related_companies.count():
+                self.fields['related_companies'].initial = self.instance.related_companies.all()
         else:
             del self.fields['related_companies']
