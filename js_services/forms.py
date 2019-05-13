@@ -53,8 +53,8 @@ class RelatedServicesPluginForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(RelatedServicesPluginForm, self).__init__(*args, **kwargs)
-        if len(RELATED_LAYOUTS) == 0:
-            self.fields['layout'].widget = forms.HiddenInput()
+        #if len(RELATED_LAYOUTS) == 0:
+        #    self.fields['layout'].widget = forms.HiddenInput()
         if IS_THERE_COMPANIES:
             self.fields['related_companies'] = forms.ModelMultipleChoiceField(queryset=Company.objects.all(), required=False)
             self.fields['related_companies'].widget = SortedFilteredSelectMultiple()
