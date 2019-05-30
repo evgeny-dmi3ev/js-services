@@ -22,6 +22,11 @@ SERVICES_ENABLE_IMAGE = getattr(
     'SERVICES_ENABLE_IMAGE',
     True,
 )
+ADD_FILTERED_CATEGORIES = getattr(
+    settings,
+    'SERVICES_ADD_FILTERED_CATEGORIES',
+    [],
+)
 try:
     IS_THERE_COMPANIES = True
     from js_companies.models import Company

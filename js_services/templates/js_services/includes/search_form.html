@@ -1,0 +1,81 @@
+{% load crispy_forms_field querystring_tags %}
+    <form action="{% url 'all-services:service-filtered' %}">
+        <input name="letter" type="hidden" value="{{ filter.form.letter.value|default:'' }}"/>
+        <div class="row">
+            <div class="col">
+                <h5>Search the directory</h5>
+                <div class="input-group mb-3">
+                  {% crispy_field filter.form.q 'class' 'form-control' %}
+                  <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" type="submit">GO</button>
+                  </div>
+                </div>
+            </div>
+            <div class="col">
+                <h5>Filter</h5>
+                <div class="form-group">
+                    {% crispy_field filter.form.category 'class' 'form-control' %}
+                </div>
+                <div class="form-group">
+                    {% crispy_field filter.form.section 'class' 'form-control' %}
+                </div>
+                <div class="form-group">
+                    {% crispy_field filter.form.company 'class' 'form-control' %}
+                </div>
+            </div>
+            <div class="col">
+                <h5>Filter by surname</h5>
+                <div class="row">
+                  {% for letter in "abcdefghijklmnopqrstuvwxyz" %}
+                  <div class="col"><a href="{% url 'all-services:service-filtered' %}?{% querystring_add 'letter' letter %}" class="btn{% if letter == filter.form.letter.value %} btn-info{% else %} btn-light{% endif %}">{{ letter|upper }}</a></div>
+                  {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% if filter.form.letter.value or filter.form.q.value or filter.form.category.value or filter.form.section.value or filter.form.company.value %}
+        <div class="row">
+            <div class="col">Search results for</div>
+            {% if filter.form.letter.value %}
+                <div class="col">
+                    surname beginning with "{{ filter.form.letter.value|upper }}"
+                    <a href="{% url 'all-services:service-filtered' %}?{% querystring_remove 'letter' %}" class="close" aria-label="Remove">
+                      <span aria-hidden="true">&times;</span>
+                    </a>
+                </div>
+            {% endif %}
+            {% if filter.form.q.value %}
+                <div class="col">
+                    name contain "{{ filter.form.q.value }}" frase
+                    <a href="{% url 'all-services:service-filtered' %}?{% querystring_remove 'q' %}" class="close" aria-label="Remove">
+                      <span aria-hidden="true">&times;</span>
+                    </a>
+                </div>
+            {% endif %}
+            {% if filter.form.category.value %}
+                <div class="col">
+                    {{ filter.form.category.label }} is {% display_choice filter.form.category %}
+                    <a href="{% url 'all-services:service-filtered' %}?{% querystring_remove 'category' %}" class="close" aria-label="Remove">
+                      <span aria-hidden="true">&times;</span>
+                    </a>
+                </div>
+            {% endif %}
+            {% if filter.form.section.value %}
+                <div class="col">
+                    {{ filter.form.section.label }} is {% display_choice filter.form.section %}
+                    <a href="{% url 'all-services:service-filtered' %}?{% querystring_remove 'section' %}" class="close" aria-label="Remove">
+                      <span aria-hidden="true">&times;</span>
+                    </a>
+                </div>
+            {% endif %}
+            {% if filter.form.company.value %}
+                <div class="col">
+                    {{ filter.form.company.label }} is {% display_choice filter.form.company %}
+                    <a href="{% url 'all-services:service-filtered' %}?{% querystring_remove 'company' %}" class="close" aria-label="Remove">
+                      <span aria-hidden="true">&times;</span>
+                    </a>
+                </div>
+            {% endif %}
+            <div class="col"><a href="{% url 'all-services:service-filtered' %}" class="btn btn-light">Reset search</a></div>
+        </div>
+        {% endif %}
+    </form>

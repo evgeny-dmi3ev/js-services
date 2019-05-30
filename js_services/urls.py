@@ -3,7 +3,7 @@ from django.conf.urls import url
 from .views import (
     ServiceDetail, ServiceList, CategoryServiceList,
     YearServiceList, MonthServiceList, DayServiceList,
-    ServiceSearchResultsList)
+    ServiceSearchResultsList, ServiceFilteredList)
 from .feeds import LatestServicesFeed, CategoryFeed
 
 urlpatterns = [
@@ -13,6 +13,9 @@ urlpatterns = [
 
     url(r'^search/$',
         ServiceSearchResultsList.as_view(), name='service-search'),
+
+    url(r'^filtered/$',
+        ServiceFilteredList.as_view(), name='service-filtered'),
 
     url(r'^(?P<year>\d{4})/$',
         YearServiceList.as_view(), name='service-list-by-year'),

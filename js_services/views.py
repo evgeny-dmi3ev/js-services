@@ -21,6 +21,7 @@ from django.views.generic.detail import DetailView
 from menus.utils import set_language_changer
 from parler.views import TranslatableSlugMixin, ViewUrlMixin
 from taggit.models import Tag
+from django_filters.views import FilterMixin
 
 from aldryn_apphooks_config.mixins import AppConfigMixin
 from aldryn_categories.models import Category
@@ -30,6 +31,17 @@ from aldryn_newsblog.utils.utilities import get_valid_languages_from_request
 from aldryn_newsblog.utils import add_prefix_to_path
 from .cms_appconfig import ServicesConfig
 from .models import Service
+from .filters import ServiceFilters
+
+
+class FilterFormMixin(object):
+
+    def get_context_data(self, **kwargs):
+        data = super(FilterFormMixin, self).get_context_data(**kwargs)
+        qs = data['object_list'] if 'object_list' in data else Service.objects.none()
+        data['filter'] = ServiceFilters(
+            self.request.GET, queryset=qs)
+        return data
 
 
 class TemplatePrefixMixin(object):
@@ -260,7 +272,7 @@ class ServiceListBase(AppConfigMixin, AppHookCheckMixin, TemplatePrefixMixin,
         return context
 
 
-class ServiceList(ServiceListBase):
+class ServiceList(FilterFormMixin, ServiceListBase):
     """A complete list of services."""
     show_header = True
 
@@ -322,6 +334,22 @@ class ServiceSearchResultsList(ServiceListBase):
         else:
             template_names = [self.template_name]
         return self.prefix_template_names(template_names)
+
+
+class ServiceFilteredList(FilterMixin, ServiceListBase):
+    template_name = 'js_services/service_list.html'
+
+    def get(self, request, *args, **kwargs):
+        self.filterset = ServiceFilters(self.request.GET, queryset=self.get_queryset())
+
+        if not self.filterset.is_bound or self.filterset.is_valid() or not self.get_strict():
+            self.object_list = self.filterset.qs
+        else:
+            self.object_list = self.filterset.queryset.none()
+
+        context = self.get_context_data(filter=self.filterset,
+                                        object_list=self.object_list)
+        return self.render_to_response(context)
 
 
 class CategoryServiceList(ServiceListBase):
