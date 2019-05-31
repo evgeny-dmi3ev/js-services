@@ -27,6 +27,12 @@ ADD_FILTERED_CATEGORIES = getattr(
     'SERVICES_ADD_FILTERED_CATEGORIES',
     [],
 )
+SERVICES_GROUP_BY_SECTIONS = getattr(
+    settings,
+    'SERVICES_GROUP_BY_SECTIONS',
+    False,
+)
+
 try:
     IS_THERE_COMPANIES = True
     from js_companies.models import Company

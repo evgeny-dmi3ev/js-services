@@ -32,6 +32,7 @@ from aldryn_newsblog.utils import add_prefix_to_path
 from .cms_appconfig import ServicesConfig
 from .models import Service
 from .filters import ServiceFilters
+from .constants import SERVICES_GROUP_BY_SECTIONS
 
 
 class FilterFormMixin(object):
@@ -42,6 +43,20 @@ class FilterFormMixin(object):
         data['filter'] = ServiceFilters(
             self.request.GET, queryset=qs)
         return data
+
+class GroupServicesMixin(object):
+
+    def get_context_data(self, **kwargs):
+        context = super(GroupServicesMixin, self).get_context_data(**kwargs)
+        services = {}
+        if SERVICES_GROUP_BY_SECTIONS:
+            for service in context['object_list'] if 'object_list' in context else Service.objects.none():
+                for section in service.sections.all():
+                    if not section in services:
+                        services[section] = []
+                    services[section].append(service)
+        context['services_by_sections'] = services
+        return context
 
 
 class TemplatePrefixMixin(object):
@@ -272,7 +287,7 @@ class ServiceListBase(AppConfigMixin, AppHookCheckMixin, TemplatePrefixMixin,
         return context
 
 
-class ServiceList(FilterFormMixin, ServiceListBase):
+class ServiceList(GroupServicesMixin, FilterFormMixin, ServiceListBase):
     """A complete list of services."""
     show_header = True
 
@@ -336,7 +351,7 @@ class ServiceSearchResultsList(ServiceListBase):
         return self.prefix_template_names(template_names)
 
 
-class ServiceFilteredList(FilterMixin, ServiceListBase):
+class ServiceFilteredList(GroupServicesMixin, FilterMixin, ServiceListBase):
     template_name = 'js_services/service_list.html'
 
     def get(self, request, *args, **kwargs):
