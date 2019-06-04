@@ -17,7 +17,7 @@ if IS_THERE_COMPANIES:
 
 
 class ServiceFilters(django_filters.FilterSet):
-    q = django_filters.CharFilter('translations__title', label='Search the directory')
+    q = django_filters.CharFilter('translations__title', 'icontains', label='Search the directory')
     category = django_filters.ModelChoiceFilter('categories', label='category', queryset=Category.objects.all().order_by('translations__name'))
     section = django_filters.ModelChoiceFilter('sections', label='section', queryset=ServicesConfig.objects.all().order_by('translations__app_title'))
     letter = django_filters.CharFilter('translations__title', 'istartswith')

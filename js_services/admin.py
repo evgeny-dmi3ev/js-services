@@ -124,6 +124,10 @@ class ServiceAdmin(
         'sections',
         'categories',
     ]
+    if IS_THERE_COMPANIES:
+        list_filter += (
+            'companies',
+        )
     actions = (
         make_featured, make_not_featured,
         make_published, make_unpublished,
