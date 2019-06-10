@@ -287,7 +287,7 @@ class ServiceListBase(AppConfigMixin, AppHookCheckMixin, TemplatePrefixMixin,
         return context
 
 
-class ServiceList(GroupServicesMixin, FilterFormMixin, ServiceListBase):
+class ServiceList(GroupServicesMixin, FilterMixin, ServiceListBase):
     """A complete list of services."""
     show_header = True
 
@@ -304,6 +304,33 @@ class ServiceList(GroupServicesMixin, FilterFormMixin, ServiceListBase):
             qs = qs.exclude(pk__in=exclude_featured)
         return qs
 
+    def get(self, request, *args, **kwargs):
+        self.filterset = ServiceFilters(self.request.GET, queryset=self.get_queryset())
+
+        if not self.filterset.is_bound or self.filterset.is_valid() or not self.get_strict():
+            self.object_list = self.filterset.qs
+        else:
+            self.object_list = self.filterset.queryset.none()
+
+        context = self.get_context_data(filter=self.filterset,
+                                        object_list=self.object_list)
+        return self.render_to_response(context)
+
+
+class ServiceFilteredList(GroupServicesMixin, FilterMixin, ServiceListBase):
+    template_name = 'js_services/service_list.html'
+
+    def get(self, request, *args, **kwargs):
+        self.filterset = ServiceFilters(self.request.GET, queryset=self.get_queryset())
+
+        if not self.filterset.is_bound or self.filterset.is_valid() or not self.get_strict():
+            self.object_list = self.filterset.qs
+        else:
+            self.object_list = self.filterset.queryset.none()
+
+        context = self.get_context_data(filter=self.filterset,
+                                        object_list=self.object_list)
+        return self.render_to_response(context)
 
 class ServiceSearchResultsList(ServiceListBase):
     model = Service
@@ -350,21 +377,6 @@ class ServiceSearchResultsList(ServiceListBase):
             template_names = [self.template_name]
         return self.prefix_template_names(template_names)
 
-
-class ServiceFilteredList(GroupServicesMixin, FilterMixin, ServiceListBase):
-    template_name = 'js_services/service_list.html'
-
-    def get(self, request, *args, **kwargs):
-        self.filterset = ServiceFilters(self.request.GET, queryset=self.get_queryset())
-
-        if not self.filterset.is_bound or self.filterset.is_valid() or not self.get_strict():
-            self.object_list = self.filterset.qs
-        else:
-            self.object_list = self.filterset.queryset.none()
-
-        context = self.get_context_data(filter=self.filterset,
-                                        object_list=self.object_list)
-        return self.render_to_response(context)
 
 
 class CategoryServiceList(ServiceListBase):
