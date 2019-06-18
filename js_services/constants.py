@@ -27,6 +27,11 @@ ADD_FILTERED_CATEGORIES = getattr(
     'SERVICES_ADD_FILTERED_CATEGORIES',
     [],
 )
+ADDITIONAL_EXCLUDE = getattr(
+    settings,
+    'SERVICES_ADDITIONAL_EXCLUDE',
+    {},
+)
 SERVICES_GROUP_BY_SECTIONS = getattr(
     settings,
     'SERVICES_GROUP_BY_SECTIONS',
