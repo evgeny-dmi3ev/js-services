@@ -2,6 +2,11 @@
 
 from django.conf import settings
 
+UPDATE_SEARCH_DATA_ON_SAVE = getattr(
+    settings,
+    'SERVICES_UPDATE_SEARCH_DATA_ON_SAVE',
+    False,
+)
 SERVICES_HIDE_RELATED_SERVICES = getattr(
     settings,
     'SERVICES_HIDE_RELATED_SERVICES',
