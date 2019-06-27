@@ -218,8 +218,9 @@ class Service(TranslatedAutoSlugifyMixin,
             language = get_current_language()
         if request is None:
             request = get_request(language=language)
+        title = self.safe_translation_getter('title', '')
         description = self.safe_translation_getter('lead_in', '')
-        text_bits = [strip_tags(description)]
+        text_bits = [title, strip_tags(description)]
         for category in self.categories.all():
             text_bits.append(
                 force_unicode(category.safe_translation_getter('name')))

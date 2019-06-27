@@ -17,6 +17,16 @@ if IS_THERE_COMPANIES:
     from js_companies.models import Company
 
 
+class SearchFilter(django_filters.Filter):
+    def filter(self, qs, values):
+        values = values or ''
+        if len(values) > 0:
+            for value in values.strip().split():
+                value = value.strip()
+                if value:
+                    qs = qs.filter(translations__search_data__icontains=value)
+        return qs
+
 
 class ServiceFilters(django_filters.FilterSet):
     q = django_filters.CharFilter('translations__title', 'icontains', label='Search the directory')
@@ -34,7 +44,7 @@ class ServiceFilters(django_filters.FilterSet):
         self.filters['category'].extra.update({'empty_label': 'by category'})
         self.filters['section'].extra.update({'empty_label': 'by section'})
         if UPDATE_SEARCH_DATA_ON_SAVE:
-            self.filters['q'] = django_filters.CharFilter('translations__search_data', 'icontains', label='Search the directory')
+            self.filters['q'] = SearchFilter(label='Search the directory')
         if IS_THERE_COMPANIES:
             self.filters['company'] = django_filters.ModelChoiceFilter('companies', label='company', queryset=Company.objects.exclude(**ADDITIONAL_EXCLUDE.get('company', {})).order_by('name'))
             self.filters['company'].extra.update({'empty_label': 'by company'})
