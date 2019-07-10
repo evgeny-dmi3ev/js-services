@@ -42,7 +42,16 @@ SERVICES_GROUP_BY_SECTIONS = getattr(
     'SERVICES_GROUP_BY_SECTIONS',
     False,
 )
-
+SITEMAP_CHANGEFREQ = getattr(
+    settings,
+    'SERVICES_SITEMAP_CHANGEFREQ',
+    'never',
+)
+SITEMAP_PRIORITY = getattr(
+    settings,
+    'SERVICES_SITEMAP_PRIORITY',
+    0.5,
+)
 try:
     IS_THERE_COMPANIES = True
     from js_companies.models import Company

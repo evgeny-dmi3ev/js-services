@@ -120,6 +120,10 @@ class Service(TranslatedAutoSlugifyMixin,
         blank=True,
         on_delete=models.SET_NULL,
     )
+    show_on_sitemap = models.BooleanField(_('Show on sitemap'), null=False, default=True)
+    show_on_xml_sitemap = models.BooleanField(_('Show on xml sitemap'), null=False, default=True)
+    noindex = models.BooleanField(_('noindex'), null=False, default=False)
+    nofollow = models.BooleanField(_('nofollow'), null=False, default=False)
 
     # Setting "symmetrical" to False since it's a bit unexpected that if you
     # set "B relates to A" you immediately have also "A relates to B". It have
@@ -202,7 +206,7 @@ class Service(TranslatedAutoSlugifyMixin,
         if self.app_config and self.app_config.namespace:
             namespace = '{0}:'.format(self.app_config.namespace)
         else:
-            namespace = ''
+            namespace = ServicesConfig.default_namespace
 
         with override(language):
             return reverse('{0}service-detail'.format(namespace), kwargs=kwargs)

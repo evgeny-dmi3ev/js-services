@@ -183,6 +183,10 @@ class ServiceAdmin(
                 'meta_title',
                 'meta_description',
                 'meta_keywords',
+                'show_on_sitemap',
+                'show_on_xml_sitemap',
+                'noindex',
+                'nofollow',
             )
         }),
     )
