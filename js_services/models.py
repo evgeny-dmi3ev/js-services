@@ -97,6 +97,8 @@ class Service(TranslatedAutoSlugifyMixin,
                                related_name='service_sidebar')
     related_articles_placeholder = PlaceholderField('service_related_articles',
                                related_name='service_related_articles')
+    banner = PlaceholderField('service_banner',
+                               related_name='service_banner')
     #app_config = AppHookConfigField(
         #ServicesConfig,
         #verbose_name=_('Section'),

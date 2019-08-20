@@ -28,11 +28,12 @@ class SearchFilter(django_filters.Filter):
         return qs
 
 
+
 class ServiceFilters(django_filters.FilterSet):
     q = django_filters.CharFilter('translations__title', 'icontains', label='Search the directory')
     service = django_filters.ModelChoiceFilter('related', label='related service', queryset=models.Service.objects.published().exclude(**ADDITIONAL_EXCLUDE.get('service', {})).order_by('translations__title'))
     category = django_filters.ModelChoiceFilter('categories', label='category', queryset=Category.objects.exclude(**ADDITIONAL_EXCLUDE.get('category', {})).order_by('translations__name'))
-    section = django_filters.ModelChoiceFilter('sections', label='section', queryset=ServicesConfig.objects.exclude(**ADDITIONAL_EXCLUDE.get('section', {})).order_by('translations__app_title'))
+    section = django_filters.ModelChoiceFilter('sections', label='section', queryset=ServicesConfig.objects.exclude(namespace=ServicesConfig.default_namespace).exclude(**ADDITIONAL_EXCLUDE.get('section', {})).order_by('translations__app_title'))
     letter = django_filters.CharFilter('translations__title', 'istartswith')
 
     class Meta:
