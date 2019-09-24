@@ -40,6 +40,10 @@ class ServicesConfig(TranslatableModel, AppHookConfig):
         app_title=models.CharField(_('name'), max_length=234),
     )
 
+    allow_post = models.BooleanField(
+        _('Allow POST requests'),
+        default=False,
+    )
     permalink_type = models.CharField(
         _('permalink type'), max_length=8,
         blank=False, default='slug', choices=PERMALINK_CHOICES,

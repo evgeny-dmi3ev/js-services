@@ -137,6 +137,12 @@ class ServiceDetail(AppConfigMixin, AppHookCheckMixin, PreviewModeMixin,
     slug_url_kwarg = 'slug'
     pk_url_kwarg = 'pk'
 
+    def post(self, request, *args, **kwargs):
+        if self.config.allow_post:
+            return super(ServiceDetail, self).get(request, *args, **kwargs)
+        else:
+            return super(ServiceDetail, self).http_method_not_allowed(request, *args, **kwargs)
+
     def get(self, request, *args, **kwargs):
         """
         This handles non-permalinked URLs according to preferences as set in
