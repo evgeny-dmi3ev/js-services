@@ -25,7 +25,6 @@ from django_filters.views import FilterMixin
 
 from aldryn_apphooks_config.mixins import AppConfigMixin
 from aldryn_categories.models import Category
-from aldryn_people.models import Person
 
 from aldryn_newsblog.utils.utilities import get_valid_languages_from_request
 from aldryn_newsblog.utils import add_prefix_to_path
@@ -347,7 +346,7 @@ class ServiceSearchResultsList(ServiceListBase):
     def get(self, request, *args, **kwargs):
         self.query = request.GET.get('q')
         self.max_services = request.GET.get('max_services', 0)
-        self.edit_mode = (request.toolbar and request.toolbar.edit_mode)
+        self.edit_mode = (request.toolbar and request.toolbar.edit_mode_active)
         return super(ServiceSearchResultsList, self).get(request)
 
     def get_paginate_by(self, queryset):

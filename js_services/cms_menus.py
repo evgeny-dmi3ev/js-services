@@ -2,7 +2,11 @@
 
 from __future__ import unicode_literals
 
-from django.core.urlresolvers import NoReverseMatch
+try:
+    from django.core.urlresolvers import NoReverseMatch
+except ImportError:
+    # Django 2.0
+    from django.urls import NoReverseMatch
 from django.utils.translation import (
     get_language_from_request,
     ugettext_lazy as _,
@@ -22,7 +26,7 @@ class ServicesMenu(CMSAttachMenu):
     def get_queryset(self, request):
         """Returns base queryset with support for preview-mode."""
         queryset = Service.objects
-        if not (request.toolbar and request.toolbar.edit_mode):
+        if not (request.toolbar and request.toolbar.edit_mode_active):
             queryset = queryset.published()
         return queryset
 

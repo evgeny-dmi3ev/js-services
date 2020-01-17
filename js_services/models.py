@@ -11,7 +11,11 @@ from cms.models.pluginmodel import CMSPlugin
 from cms.utils.i18n import get_current_language, get_redirect_on_fallback
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-from django.core.urlresolvers import reverse
+try:
+    from django.core.urlresolvers import reverse
+except ImportError:
+    # Django 2.0
+    from django.urls import reverse
 from django.db import connection, models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -26,7 +30,6 @@ from djangocms_icon.fields import Icon
 from js_color_picker.fields import RGBColorField
 from parler.models import TranslatableModel, TranslatedFields
 from aldryn_newsblog.utils import get_plugin_index_data, get_request, strip_tags
-from aldryn_newsblog.models import Article, NewsBlogConfig
 from aldryn_people.models import Person
 
 
@@ -39,8 +42,11 @@ from .constants import (
 try:
     from django.utils.encoding import force_unicode
 except ImportError:
-    from django.utils.encoding import force_text as force_unicode
-
+    try:
+        from django.utils.encoding import force_text as force_unicode
+    except ImportError:
+        def force_unicode(value):
+            return value.decode()
 
 @python_2_unicode_compatible
 class Service(TranslatedAutoSlugifyMixin,
@@ -264,9 +270,10 @@ class Service(TranslatedAutoSlugifyMixin,
         return self.categories.all()
 
     def related_articles(self, article_category=None):
+        articles = self.article_set.published()
         if article_category:
-            return Article.objects.published().filter(services=self, app_config__namespace=article_category)
-        return Article.objects.published().filter(services=self)
+            return articles.filter(app_config__namespace=article_category)
+        return articles
 
     def services(self, service_category=None):
         if service_category:
@@ -315,11 +322,11 @@ class RelatedServicesPlugin(CMSPlugin):
     # NOTE: This one does NOT subclass NewsBlogCMSPlugin. This is because this
     # plugin can really only be placed on the article detail view in an apphook.
     cmsplugin_ptr = models.OneToOneField(
-        CMSPlugin, related_name='+', parent_link=True)
+        CMSPlugin, on_delete=models.CASCADE, related_name='+', parent_link=True)
 
     title = models.CharField(max_length=255, blank=True, verbose_name=_('Title'))
     icon = Icon(blank=False, default='')
-    image = FilerImageField(null=True, blank=True, related_name='+')
+    image = FilerImageField(on_delete=models.SET_NULL, null=True, blank=True, related_name='+')
     count = models.PositiveSmallIntegerField(verbose_name=_('Number services'))
     layout = models.CharField(max_length=30, verbose_name=_('layout'))
     background_color = RGBColorField(verbose_name=_('Background Color'),

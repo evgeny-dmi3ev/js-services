@@ -12,7 +12,10 @@ from django import forms
 from django.forms import widgets
 from parler.admin import TranslatableAdmin
 from parler.forms import TranslatableModelForm
-from sortedm2m_filter_horizontal_widget.forms import SortedFilteredSelectMultiple
+try:
+    from sortedm2m_filter_horizontal_widget.forms import SortedFilteredSelectMultiple
+except:
+    SortedFilteredSelectMultiple = FilteredSelectMultiple
 
 from . import models
 
@@ -206,9 +209,9 @@ class ServiceAdmin(
 
     def formfield_for_manytomany(self, db_field, request=None, **kwargs):
         if db_field.name == 'related' and SERVICES_HIDE_RELATED_SERVICES == 0:
-            kwargs['widget'] = SortedFilteredSelectMultiple(attrs={'verbose_name': 'service', 'verbose_name_plural': 'related services'})
+            kwargs['widget'] = SortedFilteredSelectMultiple('service')
         if db_field.name == 'companies':
-            kwargs['widget'] = SortedFilteredSelectMultiple(attrs={'verbose_name': 'company', 'verbose_name_plural': 'companies'})
+            kwargs['widget'] = SortedFilteredSelectMultiple('company', False, attrs={'verbose_name_plural': 'companies'})
         if db_field.name == 'sections':
             kwargs["queryset"] = models.ServicesConfig.objects.exclude(namespace=models.ServicesConfig.default_namespace)
         return super(ServiceAdmin, self).formfield_for_manytomany(db_field, request, **kwargs)

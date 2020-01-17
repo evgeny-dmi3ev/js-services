@@ -54,7 +54,7 @@ class Migration(migrations.Migration):
                 'default_permissions': (),
             },
         ),
-        migrations.AlterField(
+        migrations.AddField(
             model_name='service',
             name='app_config',
             field=aldryn_apphooks_config.fields.AppHookConfigField(help_text='When selecting a value, the form is reloaded to get the updated default', on_delete=django.db.models.deletion.CASCADE, to='js_services.ServicesConfig', verbose_name='Section'),

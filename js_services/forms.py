@@ -5,7 +5,11 @@ from django.conf import settings
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.utils.text import slugify
 from django.utils.safestring import mark_safe
-from sortedm2m_filter_horizontal_widget.forms import SortedFilteredSelectMultiple, SortedMultipleChoiceField
+try:
+    from sortedm2m_filter_horizontal_widget.forms import SortedFilteredSelectMultiple, SortedMultipleChoiceField
+except:
+    SortedFilteredSelectMultiple = FilteredSelectMultiple
+    SortedMultipleChoiceField = forms.ModelMultipleChoiceField
 from aldryn_categories.models import Category
 from aldryn_people.models import Person
 from . import models
@@ -26,13 +30,13 @@ RELATED_LAYOUTS_CHOICES = zip(list(map(lambda s: slugify(s).replace('-', '_'), (
 
 class RelatedServicesPluginForm(forms.ModelForm):
 
-    layout = forms.ChoiceField(RELATED_LAYOUTS_CHOICES, required=False)
+    layout = forms.ChoiceField(choices=RELATED_LAYOUTS_CHOICES, required=False)
 
     related_services = SortedMultipleChoiceField(
         label='related services',
         queryset=models.Service.objects.all(),
         required=False,
-        widget=SortedFilteredSelectMultiple(attrs={'verbose_name':'service', 'verbose_name_plural':'services'})
+        widget=SortedFilteredSelectMultiple('service', False, attrs={'verbose_name_plural':'services'})
     )
     related_sections = forms.ModelMultipleChoiceField(
         queryset=models.ServicesConfig.objects.exclude(namespace=models.ServicesConfig.default_namespace),

@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
         migrations.swappable_dependency(settings.FILER_IMAGE_MODEL),
         #('js_companies', '0002_auto_20190417_0522'),
         ('aldryn_people', '0034_relatedpeopleplugin_related_companies'),
-        ('aldryn_categories', '0007_categorytranslation_landing_page'),
+        ('aldryn_categories', '0004_auto_20150623_0859'),
         ('cms', '0020_old_tree_cleanup'),
         ('js_services', '0008_service_sections'),
     ]

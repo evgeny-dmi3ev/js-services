@@ -20,9 +20,8 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('aldryn_newsblog', '0033_auto_20181231_1158'),
         ('cms', '0020_old_tree_cleanup'),
-        ('aldryn_categories', '0007_categorytranslation_landing_page'),
+        ('aldryn_categories', '0004_auto_20150623_0859'),
         migrations.swappable_dependency(settings.FILER_IMAGE_MODEL),
     ]
 
@@ -34,7 +33,6 @@ class Migration(migrations.Migration):
                 ('publishing_date', models.DateTimeField(default=django.utils.timezone.now, verbose_name='publishing date')),
                 ('is_published', models.BooleanField(db_index=True, default=False, verbose_name='is published')),
                 ('is_featured', models.BooleanField(db_index=True, default=False, verbose_name='is featured')),
-                ('app_config', aldryn_apphooks_config.fields.AppHookConfigField(default=1, help_text='When selecting a value, the form is reloaded to get the updated default', on_delete=django.db.models.deletion.CASCADE, to='aldryn_newsblog.NewsBlogConfig', verbose_name='Section')),
                 ('categories', aldryn_categories.fields.CategoryManyToManyField(blank=True, to='aldryn_categories.Category', verbose_name='categories')),
                 ('content', cms.models.fields.PlaceholderField(editable=False, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='newsblog_service_content', slotname='newsblog_service_content', to='cms.Placeholder')),
                 ('featured_image', filer.fields.image.FilerImageField(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.FILER_IMAGE_MODEL, verbose_name='featured image')),

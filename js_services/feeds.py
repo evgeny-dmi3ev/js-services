@@ -7,7 +7,11 @@ try:
 except ImportError:
     # Django 1.6
     from django.contrib.sites.models import get_current_site
-from django.core.urlresolvers import reverse
+try:
+    from django.core.urlresolvers import reverse
+except ImportError:
+    # Django 2.0
+    from django.urls import reverse
 from django.utils.translation import get_language_from_request, ugettext as _
 
 from aldryn_apphooks_config.utils import get_app_instance
