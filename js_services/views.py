@@ -83,7 +83,7 @@ class EditModeMixin(object):
 
     def dispatch(self, request, *args, **kwargs):
         self.edit_mode = (
-            self.request.toolbar and self.request.toolbar.edit_mode)
+            self.request.toolbar and self.request.toolbar.edit_mode_active)
         return super(EditModeMixin, self).dispatch(request, *args, **kwargs)
 
 
