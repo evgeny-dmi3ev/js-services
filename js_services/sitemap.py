@@ -24,7 +24,7 @@ class ServicesSitemap(I18NSitemap):
     def items(self):
         qs = Service.objects.published()
         if self.language is not None:
-            qs = qs.translated(self.language)
+            qs = qs.language(self.language)
         if self.namespace is not None:
             qs = qs.filter(sections__namespace=self.namespace)
         if self.sitemap_type == 'html':

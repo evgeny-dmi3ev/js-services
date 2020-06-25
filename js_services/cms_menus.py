@@ -37,9 +37,10 @@ class ServicesMenu(CMSAttachMenu):
 
         if hasattr(self, 'instance') and self.instance:
             app = apphook_pool.get_apphook(self.instance.application_urls)
-            config = app.get_config(self.instance.application_namespace)
-            if config:
-                services = services.filter(app_config=config)
+            if app:
+                config = app.get_config(self.instance.application_namespace)
+                if config:
+                    services = services.filter(app_config=config)
 
         for service in services:
             try:

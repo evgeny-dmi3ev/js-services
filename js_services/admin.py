@@ -191,6 +191,7 @@ class ServiceAdmin(
                 'show_on_xml_sitemap',
                 'noindex',
                 'nofollow',
+                'canonical_url',
             )
         }),
     )
@@ -222,7 +223,7 @@ class ServiceAdmin(
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
         if IS_THERE_COMPANIES:
-            obj.companies = Company.objects.filter(pk__in=form.cleaned_data.get('companies'))
+            obj.companies.set(Company.objects.filter(pk__in=form.cleaned_data.get('companies')))
 
 
 admin.site.register(models.Service, ServiceAdmin)

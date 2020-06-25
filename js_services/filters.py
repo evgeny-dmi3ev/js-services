@@ -16,6 +16,11 @@ from .constants import (
 if IS_THERE_COMPANIES:
     from js_companies.models import Company
 
+try:
+    from custom.js_services.filters import CustomFilterMixin
+except:
+    class CustomFilterMixin(object):
+        pass
 
 class SearchFilter(django_filters.Filter):
     def filter(self, qs, values):
@@ -29,11 +34,11 @@ class SearchFilter(django_filters.Filter):
 
 
 
-class ServiceFilters(django_filters.FilterSet):
+class ServiceFilters(CustomFilterMixin, django_filters.FilterSet):
     q = django_filters.CharFilter('translations__title', 'icontains', label='Search the directory')
-    service = django_filters.ModelChoiceFilter('related', label='related service', queryset=models.Service.objects.published().exclude(**ADDITIONAL_EXCLUDE.get('service', {})).order_by('translations__title'))
-    category = django_filters.ModelChoiceFilter('categories', label='category', queryset=Category.objects.exclude(**ADDITIONAL_EXCLUDE.get('category', {})).order_by('translations__name'))
-    section = django_filters.ModelChoiceFilter('sections', label='section', queryset=ServicesConfig.objects.exclude(namespace=ServicesConfig.default_namespace).exclude(**ADDITIONAL_EXCLUDE.get('section', {})).order_by('translations__app_title'))
+    service = django_filters.ModelChoiceFilter('related', label='service', empty_label='by service', queryset=models.Service.objects.published().exclude(**ADDITIONAL_EXCLUDE.get('service', {})))
+    category = django_filters.ModelChoiceFilter('categories', label='category', empty_label='by category', queryset=Category.objects.exclude(**ADDITIONAL_EXCLUDE.get('category', {})))
+    section = django_filters.ModelChoiceFilter('sections', label='section', empty_label='by section', queryset=ServicesConfig.objects.exclude(namespace=ServicesConfig.default_namespace).exclude(**ADDITIONAL_EXCLUDE.get('section', {})))
     letter = django_filters.CharFilter('translations__title', 'istartswith')
 
     class Meta:
@@ -42,8 +47,9 @@ class ServiceFilters(django_filters.FilterSet):
 
     def __init__(self, values, *args, **kwargs):
         super(ServiceFilters, self).__init__(values, *args, **kwargs)
-        self.filters['category'].extra.update({'empty_label': 'by category'})
-        self.filters['section'].extra.update({'empty_label': 'by section'})
+        self.sort_choices(self.filters['service'])
+        self.sort_choices(self.filters['category'])
+        self.sort_choices(self.filters['section'])
         if UPDATE_SEARCH_DATA_ON_SAVE:
             self.filters['q'] = SearchFilter(label='Search the directory')
         if IS_THERE_COMPANIES:
@@ -55,3 +61,10 @@ class ServiceFilters(django_filters.FilterSet):
                 name = category[0].replace('-', '_')
                 self.filters[name] = django_filters.ModelChoiceFilter('categories', label=category[1], queryset=qs)
                 self.filters[name].extra.update({'empty_label': category[1]})
+
+    def sort_choices(self, field):
+        field = field.field
+        if isinstance(field.choices, django_filters.fields.ModelChoiceIterator):
+            choices = [(obj.pk, str(obj)) for obj in field.choices.queryset]
+            field.iterator = django_filters.fields.ChoiceIterator
+            field._set_choices(sorted(choices, key=lambda item: item[1]))

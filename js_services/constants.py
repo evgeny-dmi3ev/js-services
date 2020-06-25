@@ -42,6 +42,11 @@ SERVICES_GROUP_BY_SECTIONS = getattr(
     'SERVICES_GROUP_BY_SECTIONS',
     False,
 )
+SERVICES_GET_NEXT_SERVICE = getattr(
+    settings,
+    'SERVICES_GET_NEXT_SERVICE',
+    False,
+)
 SITEMAP_CHANGEFREQ = getattr(
     settings,
     'SERVICES_SITEMAP_CHANGEFREQ',

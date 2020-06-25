@@ -31,7 +31,7 @@ from aldryn_newsblog.utils import add_prefix_to_path
 from .cms_appconfig import ServicesConfig
 from .models import Service
 from .filters import ServiceFilters
-from .constants import SERVICES_GROUP_BY_SECTIONS
+from .constants import SERVICES_GROUP_BY_SECTIONS, SERVICES_GET_NEXT_SERVICE
 
 
 class FilterFormMixin(object):
@@ -123,10 +123,10 @@ class AppHookCheckMixin(object):
         # if your mixin contains filtering after super call - please place it
         # after this mixin.
         qs = super(AppHookCheckMixin, self).get_queryset()
-        return qs.translated(*self.valid_languages)
+        return qs#.translated(*self.valid_languages)
 
 
-class ServiceDetail(AppConfigMixin, AppHookCheckMixin, PreviewModeMixin,
+class ServiceDetail(AppConfigMixin, AppHookCheckMixin, EditModeMixin,
                     TranslatableSlugMixin, TemplatePrefixMixin, DetailView):
     model = Service
     slug_field = 'slug'
@@ -153,7 +153,9 @@ class ServiceDetail(AppConfigMixin, AppHookCheckMixin, PreviewModeMixin,
         url = self.object.get_absolute_url()
         if (self.config.non_permalink_handling == 200 or request.path == url):
             # Continue as normal
-            return super(ServiceDetail, self).get(request, *args, **kwargs)
+            #return super(ServiceDetail, self).get(request, *args, **kwargs)
+            context = self.get_context_data(object=self.object)
+            return self.render_to_response(context)
 
         # Check to see if the URL path matches the correct absolute_url of
         # the found object
@@ -193,56 +195,57 @@ class ServiceDetail(AppConfigMixin, AppHookCheckMixin, PreviewModeMixin,
         context['next_service'] = self.get_next_object(
             self.queryset, self.object)
 
-        service = context['service']
-        categories = service.categories.all()
-        ra_qs = Service.objects.all().filter(is_published=True).filter(
-            publishing_date__lte=datetime.now()).distinct()
-        ra_qs = ra_qs.filter(categories__in=categories)
-        ra_qs = ra_qs.exclude(id=service.id)
-        context['related_services'] = ra_qs[:3]
+        if False:
+            service = context['service']
+            categories = service.categories.all()
+            ra_qs = Service.objects.all().filter(is_published=True).filter(
+                publishing_date__lte=datetime.now()).distinct()
+            ra_qs = ra_qs.filter(categories__in=categories)
+            ra_qs = ra_qs.exclude(id=service.id)
+            context['related_services'] = ra_qs[:3]
 
-        related_types_first = service.app_config
-        if related_types_first is not None:
-            context['related_types_first'] = related_types_first.namespace
-        else:
-            context['related_types_first'] = 'all'
-        related_categories_first = service.categories.all().first()
-        if related_categories_first is not None:
-            context['related_categories_first'] = related_categories_first.slug
-        else:
-            context['related_categories_first'] = 'all'
+            related_types_first = service.app_config
+            if related_types_first is not None:
+                context['related_types_first'] = related_types_first.namespace
+            else:
+                context['related_types_first'] = 'all'
+            related_categories_first = service.categories.all().first()
+            if related_categories_first is not None:
+                context['related_categories_first'] = related_categories_first.slug
+            else:
+                context['related_categories_first'] = 'all'
 
         return context
 
     def get_prev_object(self, queryset=None, object=None):
-        if queryset is None:
-            queryset = self.get_queryset()
-        if object is None:
-            object = self.get_object(self)
-        prev_objs = queryset.filter(
-            publishing_date__lt=object.publishing_date
-        ).order_by(
-            '-publishing_date'
-        )[:1]
-        if prev_objs:
-            return prev_objs[0]
-        else:
-            return None
+        if SERVICES_GET_NEXT_SERVICE:
+            if queryset is None:
+                queryset = self.get_queryset()
+            if object is None:
+                object = self.get_object(self)
+            prev_objs = queryset.filter(
+                publishing_date__lt=object.publishing_date
+            ).order_by(
+                '-publishing_date'
+            )[:1]
+            if prev_objs:
+                return prev_objs[0]
+        return None
 
     def get_next_object(self, queryset=None, object=None):
-        if queryset is None:
-            queryset = self.get_queryset()
-        if object is None:
-            object = self.get_object(self)
-        next_objs = queryset.filter(
-            publishing_date__gt=object.publishing_date
-        ).order_by(
-            'publishing_date'
-        )[:1]
-        if next_objs:
-            return next_objs[0]
-        else:
-            return None
+        if SERVICES_GET_NEXT_SERVICE:
+            if queryset is None:
+                queryset = self.get_queryset()
+            if object is None:
+                object = self.get_object(self)
+            next_objs = queryset.filter(
+                publishing_date__gt=object.publishing_date
+            ).order_by(
+                'publishing_date'
+            )[:1]
+            if next_objs:
+                return next_objs[0]
+        return None
 
 
 class ServiceListBase(AppConfigMixin, AppHookCheckMixin, TemplatePrefixMixin,
@@ -295,6 +298,9 @@ class ServiceListBase(AppConfigMixin, AppHookCheckMixin, TemplatePrefixMixin,
 class ServiceList(GroupServicesMixin, FilterMixin, ServiceListBase):
     """A complete list of services."""
     show_header = True
+
+    def get_strict(self):
+        return False
 
     def get_queryset(self):
         qs = super(ServiceList, self).get_queryset()

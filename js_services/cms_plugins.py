@@ -49,7 +49,7 @@ class RelatedServicesPlugin(CMSPluginBase):
             if related_people.exists():
                 qs = qs.filter(person_set=related_people)
             if IS_THERE_COMPANIES and related_companies.exists():
-                qs = qs.filter(companies=related_companies)
+                qs = qs.filter(companies__in=related_companies)
             if related_categories.exists():
                 qs = qs.filter(services__in=related_categories)
 
@@ -70,4 +70,4 @@ class RelatedServicesPlugin(CMSPluginBase):
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
         if IS_THERE_COMPANIES:
-            obj.related_companies = Company.objects.filter(pk__in=form.cleaned_data.get('related_companies'))
+            obj.related_companies.set(Company.objects.filter(pk__in=form.cleaned_data.get('related_companies')))
