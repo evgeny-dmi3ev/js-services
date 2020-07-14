@@ -18,6 +18,7 @@ try:
 except ImportError:
     # Django 2.0
     from django.urls import reverse
+from django.contrib.postgres.fields import JSONField
 from django.db import connection, models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -146,6 +147,7 @@ class Service(CustomServiceMixin,
         max_length=255,
         verbose_name=_('Canonical URL')
     )
+    custom_fields = JSONField(blank=True, null=True)
 
     # Setting "symmetrical" to False since it's a bit unexpected that if you
     # set "B relates to A" you immediately have also "A relates to B". It have

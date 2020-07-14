@@ -8,6 +8,7 @@ from app_data import AppDataForm
 from cms.models.fields import PlaceholderField
 from django import forms
 from django.conf import settings
+from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
@@ -98,6 +99,7 @@ class ServicesConfig(TranslatableModel, AppHookConfig):
         default=True,
         help_text=_('Include services in search indexes?'),
     )
+    custom_fields_settings = JSONField(blank=True, null=True)
 
     def get_app_title(self):
         return getattr(self, 'app_title', _('untitled'))

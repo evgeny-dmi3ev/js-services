@@ -16,6 +16,18 @@ try:
     from sortedm2m_filter_horizontal_widget.forms import SortedFilteredSelectMultiple
 except:
     SortedFilteredSelectMultiple = FilteredSelectMultiple
+try:
+    from js_custom_fields.forms import CustomFieldsFormMixin, CustomFieldsSettingsFormMixin
+except:
+    class CustomFieldsFormMixin(object):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.fields['custom_fields'].widget = forms.HiddenInput()
+
+    class CustomFieldsSettingsFormMixin(object):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.fields['custom_fields_settings'].widget = forms.HiddenInput()
 
 from . import models
 
@@ -64,8 +76,10 @@ make_not_featured.short_description = _(
     "Mark selected articles as not featured")
 
 
-class ServiceAdminForm(TranslatableModelForm):
+class ServiceAdminForm(CustomFieldsFormMixin, TranslatableModelForm):
     companies = forms.CharField()
+
+    custom_fields = 'get_custom_fields'
 
     class Meta:
         model = models.Service
@@ -111,6 +125,14 @@ class ServiceAdminForm(TranslatableModelForm):
         else:
             del self.fields['companies']
 
+    def get_custom_fields(self):
+        fields = {}
+        if self.instance:
+            for section in self.instance.sections.all():
+                fields.update(section.custom_fields_settings)
+        return fields
+
+
 
 class ServiceAdmin(
     AllTranslationsMixin,
@@ -153,8 +175,8 @@ class ServiceAdmin(
         )
     settings_fields += (
         'lead_in',
+        'custom_fields',
     )
-
 
     advanced_settings_fields = (
         'categories',
@@ -228,6 +250,8 @@ class ServiceAdmin(
 
 admin.site.register(models.Service, ServiceAdmin)
 
+class ServicesConfigAdminForm(CustomFieldsSettingsFormMixin, TranslatableModelForm):
+    pass
 
 class ServicesConfigAdmin(
     AllTranslationsMixin,
@@ -235,12 +259,15 @@ class ServicesConfigAdmin(
     BaseAppHookConfig,
     TranslatableAdmin
 ):
+    form = ServicesConfigAdminForm
+
     def get_config_fields(self):
         return (
             'app_title', 'allow_post', 'permalink_type', 'non_permalink_handling',
             'template_prefix', 'paginate_by', 'pagination_pages_start',
             'pagination_pages_visible', 'exclude_featured',
-            'search_indexed', 'config.default_published',)
+            'search_indexed', 'config.default_published',
+            'custom_fields_settings')
 
     #def get_readonly_fields(self, request, obj=None):
         #return self.readonly_fields
