@@ -6,7 +6,7 @@ from aldryn_translation_tools.sitemaps import I18NSitemap
 
 from .models import Service
 from .cms_appconfig import ServicesConfig
-from .constants import SITEMAP_CHANGEFREQ, SITEMAP_PRIORITY
+from .constants import SITEMAP_CHANGEFREQ, SITEMAP_PRIORITY, TRANSLATE_IS_PUBLISHED
 
 
 class ServicesSitemap(I18NSitemap):
@@ -35,3 +35,19 @@ class ServicesSitemap(I18NSitemap):
 
     def lastmod(self, obj):
         return obj.publishing_date
+
+
+try:
+    from js_sitemap.alt_sitemap import SitemapAlt
+    class ServicesSitemapAlt(SitemapAlt, ServicesSitemap):
+        def get_queryset(self):
+            if TRANSLATE_IS_PUBLISHED:
+                return Service.objects.published_one_of_trans().prefetch_related('translations').distinct()
+            return super(ServicesSitemapAlt, self).get_queryset()
+
+        def languages(self, obj):
+            if TRANSLATE_IS_PUBLISHED:
+                return obj.translations.filter(is_published_trans=True).values_list('language_code', flat=True)
+            return super(ServicesSitemapAlt, self).languages(obj)
+except:
+    pass

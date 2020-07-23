@@ -6,10 +6,28 @@ from aldryn_apphooks_config.admin import BaseAppHookConfig, ModelAppHookConfig
 from aldryn_people.models import Person
 from aldryn_translation_tools.admin import AllTranslationsMixin
 from cms.admin.placeholderadmin import FrontendEditableAdminMixin
-from django.contrib import admin
-from django.utils.translation import ugettext_lazy as _
+from cms.admin.placeholderadmin import PlaceholderAdminMixin
+from cms.utils.i18n import get_current_language, get_language_list
+from cms.utils import copy_plugins, get_current_site
+from django.db import transaction
+from django.db.models.query import EmptyQuerySet
 from django import forms
+from django.conf.urls import url
+from django.contrib import admin
+from django.contrib.sites.models import Site
 from django.forms import widgets
+from django.views.decorators.http import require_POST
+from django.utils.translation import ugettext_lazy as _
+from django.utils.decorators import method_decorator
+from django.utils.encoding import force_text
+from django.core.exceptions import PermissionDenied
+from django.http import (
+    HttpResponseRedirect,
+    HttpResponse,
+    Http404,
+    HttpResponseBadRequest,
+    HttpResponseForbidden,
+)
 from parler.admin import TranslatableAdmin
 from parler.forms import TranslatableModelForm
 try:
@@ -37,44 +55,72 @@ from .constants import (
     SERVICES_ENABLE_PUBDATE,
     SERVICES_ENABLE_IMAGE,
     IS_THERE_COMPANIES,
+    TRANSLATE_IS_PUBLISHED,
 )
 if IS_THERE_COMPANIES:
     from js_companies.models import Company
 
-from cms.admin.placeholderadmin import PlaceholderAdminMixin
+require_POST = method_decorator(require_POST)
 
 
 def make_published(modeladmin, request, queryset):
-    queryset.update(is_published=True)
+    if TRANSLATE_IS_PUBLISHED:
+        for i in queryset.all():
+            i.is_published_trans = True
+            i.save()
+        #language = get_current_language()
+        #models.ArticleTranslation.objects.filter(language_code=language, master__in=queryset).update(is_published_trans=True)
+    else:
+        queryset.update(is_published=True)
 
 
 make_published.short_description = _(
-    "Mark selected articles as published")
+    "Mark selected services as published")
 
 
 def make_unpublished(modeladmin, request, queryset):
-    queryset.update(is_published=False)
+    if TRANSLATE_IS_PUBLISHED:
+        for i in queryset.all():
+            i.is_published_trans = False
+            i.save()
+        #language = get_current_language()
+        #models.ArticleTranslation.objects.filter(language_code=language, master__in=queryset).update(is_published_trans=False)
+    else:
+        queryset.update(is_published=False)
 
 
 make_unpublished.short_description = _(
-    "Mark selected articles as not published")
+    "Mark selected services as not published")
 
 
 def make_featured(modeladmin, request, queryset):
-    queryset.update(is_featured=True)
+    if TRANSLATE_IS_PUBLISHED:
+        for i in queryset.all():
+            i.is_featured_trans = True
+            i.save()
+        #language = get_current_language()
+        #models.ArticleTranslation.objects.filter(language_code=language, master__in=queryset).update(is_featured_trans=True)
+    else:
+        queryset.update(is_featured=True)
 
 
 make_featured.short_description = _(
-    "Mark selected articles as featured")
+    "Mark selected services as featured")
 
 
 def make_not_featured(modeladmin, request, queryset):
-    queryset.update(is_featured=False)
+    if TRANSLATE_IS_PUBLISHED:
+        for i in queryset.all():
+            i.is_featured_trans = False
+            i.save()
+        #language = get_current_language()
+        #models.ArticleTranslation.objects.filter(language_code=language, master__in=queryset).update(is_featured_trans=False)
+    else:
+        queryset.update(is_featured=False)
 
 
 make_not_featured.short_description = _(
-    "Mark selected articles as not featured")
-
+    "Mark selected services as not featured")
 
 class ServiceAdminForm(CustomFieldsFormMixin, TranslatableModelForm):
     companies = forms.CharField()
@@ -129,7 +175,8 @@ class ServiceAdminForm(CustomFieldsFormMixin, TranslatableModelForm):
         fields = {}
         if self.instance:
             for section in self.instance.sections.all():
-                fields.update(section.custom_fields_settings)
+                if section.custom_fields_settings:
+                    fields.update(section.custom_fields_settings)
         return fields
 
 
@@ -230,6 +277,27 @@ class ServiceAdmin(
     app_config_selection_title = ''
     app_config_selection_desc = ''
 
+    def get_list_display(self, request):
+        fields = []
+        list_display = super().get_list_display(request)
+        for field in list_display:
+            if field  in ['is_published', 'is_featured'] and TRANSLATE_IS_PUBLISHED:
+                field += '_trans'
+            fields.append(field)
+        return fields
+
+    def get_fieldsets(self, request, obj=None):
+        fieldsets = super().get_fieldsets(request, obj)
+        for fieldset in fieldsets:
+            if len(fieldset) == 2 and 'fields' in fieldset[1]:
+                fields = []
+                for field in fieldset[1]['fields']:
+                    if field  in ['is_published', 'is_featured'] and TRANSLATE_IS_PUBLISHED:
+                        field += '_trans'
+                    fields.append(field)
+                fieldset[1]['fields'] = fields
+        return fieldsets
+
     def formfield_for_manytomany(self, db_field, request=None, **kwargs):
         if db_field.name == 'related' and SERVICES_HIDE_RELATED_SERVICES == 0:
             kwargs['widget'] = SortedFilteredSelectMultiple('service')
@@ -247,6 +315,49 @@ class ServiceAdmin(
         if IS_THERE_COMPANIES:
             obj.companies.set(Company.objects.filter(pk__in=form.cleaned_data.get('companies')))
 
+    def get_site(self, request):
+        site_id = request.session.get('cms_admin_site')
+        if not site_id:
+            return get_current_site()
+        try:
+            site = Site.objects._get_site_by_id(site_id)
+        except Site.DoesNotExist:
+            site = get_current_site()
+        return site
+
+    @require_POST
+    @transaction.atomic
+    def copy_language(self, request, obj_id):
+        obj = self.get_object(request, object_id=obj_id)
+        source_language = request.POST.get('source_language')
+        target_language = request.POST.get('target_language')
+
+        if not self.has_change_permission(request, obj=obj):
+            raise PermissionDenied
+
+        if obj is None:
+            raise Http404
+
+        if not target_language or not target_language in get_language_list(site_id=self.get_site(request).pk):
+            return HttpResponseBadRequest(force_text(_("Language must be set to a supported language!")))
+
+        for placeholder in obj.get_placeholders():
+            plugins = list(
+                placeholder.get_plugins(language=source_language).order_by('path'))
+            if not placeholder.has_add_plugins_permission(request.user, plugins):
+                return HttpResponseForbidden(force_text(_('You do not have permission to copy these plugins.')))
+            copy_plugins.copy_plugins_to(plugins, placeholder, target_language)
+        return HttpResponse("ok")
+
+    def get_urls(self):
+        urlpatterns = super().get_urls()
+        opts = self.model._meta
+        info = opts.app_label, opts.model_name
+        return [url(
+            r'^(.+)/copy_language/$',
+            self.admin_site.admin_view(self.copy_language),
+            name='{0}_{1}_copy_language'.format(*info)
+        )] + urlpatterns
 
 admin.site.register(models.Service, ServiceAdmin)
 

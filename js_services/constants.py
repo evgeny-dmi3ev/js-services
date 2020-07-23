@@ -27,6 +27,11 @@ SERVICES_ENABLE_IMAGE = getattr(
     'SERVICES_ENABLE_IMAGE',
     True,
 )
+TRANSLATE_IS_PUBLISHED = getattr(
+    settings,
+    'SERVICES_TRANSLATE_IS_PUBLISHED',
+    False,
+)
 ADD_FILTERED_CATEGORIES = getattr(
     settings,
     'SERVICES_ADD_FILTERED_CATEGORIES',

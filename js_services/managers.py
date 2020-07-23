@@ -16,7 +16,7 @@ from django.utils.timezone import now
 from aldryn_apphooks_config.managers.base import ManagerMixin, QuerySetMixin
 from parler.managers import TranslatableManager, TranslatableQuerySet
 
-from .constants import SERVICES_ENABLE_PUBDATE, SERVICES_ENABLE_IMAGE
+from .constants import SERVICES_ENABLE_PUBDATE, SERVICES_ENABLE_IMAGE, TRANSLATE_IS_PUBLISHED
 
 class ServiceQuerySet(TranslatableQuerySet):
     def published(self):
@@ -24,9 +24,20 @@ class ServiceQuerySet(TranslatableQuerySet):
         Returns Services that are published AND have a publishing_date that
         has actually passed.
         """
+        qs = self
         if SERVICES_ENABLE_PUBDATE:
-            return self.filter(is_published=True, publishing_date__lte=now())
-        return self.filter(is_published=True)
+            qs = self.filter(publishing_date__lte=now())
+        if TRANSLATE_IS_PUBLISHED:
+            return qs.translated(is_published_trans=True)
+        return qs.filter(is_published=True)
+
+    def published_one_of_trans(self):
+        qs = self
+        if SERVICES_ENABLE_PUBDATE:
+            qs = self.filter(publishing_date__lte=now())
+        if TRANSLATE_IS_PUBLISHED:
+            return qs.filter(translations__is_published_trans=True)
+        return qs.filter(is_published=True)
 
 
     def namespace(self, namespace, to=None):
@@ -42,6 +53,9 @@ class RelatedManager(ManagerMixin, TranslatableManager):
 
     def published(self):
         return self.get_queryset().published()
+
+    def published_one_of_trans(self):
+        return self.get_queryset().published_one_of_trans()
 
     def get_months(self, request, namespace):
         """

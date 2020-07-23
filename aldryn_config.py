@@ -21,6 +21,9 @@ class Form(forms.BaseForm):
     related_templates = forms.CharField(
         'Related services templates, comma separated', required=False
     )
+    translate_is_published = forms.CheckboxField(
+        'Translate Is published and Is featured fields', required=False, initial=False
+    )
 
     def to_settings(self, data, settings):
 
@@ -34,5 +37,7 @@ class Form(forms.BaseForm):
             settings['SERVICES_ENABLE_IMAGE'] = int(data['enable_image'])
         if data['related_templates']:
             settings['SERVICES_RELATED_SERVICES_LAYOUTS'] = data['related_templates'].split(',')
+        if data['translate_is_published']:
+            settings['SERVICES_TRANSLATE_IS_PUBLISHED'] = int(data['translate_is_published'])
 
         return settings

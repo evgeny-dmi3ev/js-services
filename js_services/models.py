@@ -41,6 +41,7 @@ from .managers import RelatedManager
 from .constants import (
     IS_THERE_COMPANIES,
     SERVICES_ENABLE_PUBDATE,
+    TRANSLATE_IS_PUBLISHED,
 )
 
 try:
@@ -105,8 +106,11 @@ class Service(CustomServiceMixin,
         meta_keywords=models.TextField(
             verbose_name=_('meta keywords'), blank=True, default=''),
         meta={'unique_together': (('language_code', 'slug', ), )},
-
-        search_data=models.TextField(blank=True, editable=False)
+        search_data=models.TextField(blank=True, editable=False),
+        is_published_trans = models.BooleanField(_('is published'),
+            default=False, db_index=True),
+        is_featured_trans = models.BooleanField(_('is featured'),
+            default=False, db_index=True),
     )
 
     content = PlaceholderField('service_content',
@@ -200,9 +204,16 @@ class Service(CustomServiceMixin,
         Returns True only if the service (is_published == True) AND has a
         published_date that has passed.
         """
+        language = get_current_language()
+        return self.published_for_language(language)
+
+    def published_for_language(self, language):
+        is_published = self.is_published
+        if TRANSLATE_IS_PUBLISHED:
+            is_published = self.safe_translation_getter('is_published_trans', language_code=language, any_language=False) or False
         if SERVICES_ENABLE_PUBDATE:
-            return (self.is_published and self.publishing_date <= now())
-        return self.is_published
+            return (is_published and self.publishing_date <= now())
+        return is_published
 
     @property
     def future(self):
@@ -243,6 +254,17 @@ class Service(CustomServiceMixin,
         with override(language):
             return reverse('{0}service-detail'.format(namespace), kwargs=kwargs)
 
+    def get_public_url(self, language=None):
+        if not language:
+            language = get_current_language()
+        if not TRANSLATE_IS_PUBLISHED and self.published:
+            return self.get_absolute_url(language)
+        if (TRANSLATE_IS_PUBLISHED and \
+                (self.safe_translation_getter('is_published_trans', language_code=language, any_language=False) or False) and \
+                self.publishing_date <= now()):
+            return self.get_absolute_url(language)
+        return ''
+
     def get_search_data(self, language=None, request=None):
         """
         Provides an index for use with Haystack, or, for populating
@@ -279,6 +301,14 @@ class Service(CustomServiceMixin,
 
     def __str__(self):
         return self.safe_translation_getter('title', any_language=True) if self.pk else ''
+
+    def get_placeholders(self):
+        return [
+            self.content,
+            self.sidebar,
+            self.related_articles_placeholder,
+            self.banner,
+        ]
 
     def services_by_category(self, category=None):
         if category:

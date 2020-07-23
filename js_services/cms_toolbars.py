@@ -5,13 +5,14 @@ from __future__ import unicode_literals
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 try:
-    from django.core.urlresolvers import reverse
+    from django.core.urlresolvers import reverse, NoReverseMatch
 except ImportError:
     # Django 2.0
-    from django.urls import reverse
+    from django.urls import reverse, NoReverseMatch
 from django.utils.translation import (
     ugettext as _, get_language_from_request, override)
 
+from cms.api import get_page_draft
 from cms.toolbar_base import CMSToolbar
 from cms.toolbar_pool import toolbar_pool
 from cms.cms_toolbars import LANGUAGE_MENU_IDENTIFIER
@@ -29,6 +30,7 @@ from .cms_appconfig import ServicesConfig
 
 from cms.cms_toolbars import ADMIN_MENU_IDENTIFIER, ADMINISTRATION_BREAK
 
+ADD_OBJ_LANGUAGE_BREAK = "Add object language Break"
 
 @toolbar_pool.register
 class ServicesToolbar(CMSToolbar):
@@ -37,10 +39,10 @@ class ServicesToolbar(CMSToolbar):
     watch_models = [Service, ]
     supported_apps = ('js_services',)
 
-    def get_on_delete_redirect_url(self, service, language):
+    def get_on_delete_redirect_url(self, obj, language):
         with override(language):
             url = reverse(
-                '{0}:service-list'.format(service.app_config.namespace))
+                '{0}:service-list'.format(obj.app_config.namespace))
         return url
 
     def __get_services_config(self):
@@ -56,6 +58,7 @@ class ServicesToolbar(CMSToolbar):
         return config
 
     def populate(self):
+        self.page = get_page_draft(self.request.current_page)
         config = self.__get_services_config()
         if not config:
             # Do nothing if there is no services app_config to work with
@@ -79,9 +82,9 @@ class ServicesToolbar(CMSToolbar):
 
             # If we're on an Service detail page, then get the service
             if view_name == '{0}:service-detail'.format(config.namespace):
-                service = get_object_from_request(Service, self.request)
+                obj = get_object_from_request(Service, self.request)
             else:
-                service = None
+                obj = None
 
             menu = self.toolbar.get_or_create_menu('services-app',
                                                    config.get_app_title())
@@ -126,30 +129,70 @@ class ServicesToolbar(CMSToolbar):
                 url = get_admin_url('js_services_service_add', **url_args)
                 menu.add_modal_item(_('Add new service'), url=url)
 
-            if change_service_perm and service:
+            if change_service_perm and obj:
                 url_args = {}
                 if language:
                     url_args = {'language': language, }
                 url = get_admin_url('js_services_service_change',
-                                    [service.pk, ], **url_args)
+                                    [obj.pk, ], **url_args)
                 menu.add_modal_item(_('Edit this service'), url=url,
                                     active=True)
 
-            if delete_service_perm and service:
+            if delete_service_perm and obj:
                 redirect_url = self.get_on_delete_redirect_url(
-                    service, language=language)
+                    obj, language=language)
                 url = get_admin_url('js_services_service_delete',
-                                    [service.pk, ])
+                                    [obj.pk, ])
                 menu.add_modal_item(_('Delete this service'), url=url,
                                     on_close=redirect_url)
 
         if settings.USE_I18N:# and not self._language_menu:
-            self._language_menu = self.toolbar.get_or_create_menu(LANGUAGE_MENU_IDENTIFIER, _('Language'), position=-1)
-            self._language_menu.items = []
-            for code, name in get_language_tuple(self.current_site.pk):
-                try:
-                    url = DefaultLanguageChanger(self.request)(code)
-                except NoReverseMatch:
-                    url = None
-                if url:
-                    self._language_menu.add_link_item(name, url=url, active=self.current_lang == code)
+            if obj:
+                self._language_menu = self.toolbar.get_or_create_menu(LANGUAGE_MENU_IDENTIFIER, _('Language'), position=-1)
+                self._language_menu.items = []
+                languages = get_language_dict(self.current_site.pk)
+                page_languages = self.page.get_languages()
+                remove = []
+
+                for code, name in get_language_tuple():
+                    if code in obj.get_available_languages():
+                        remove.append((code, name))
+                        try:
+                            url = obj.get_absolute_url(code)
+                        except NoReverseMatch:
+                            url = None
+                        if url and code in page_languages:
+                            self._language_menu.add_link_item(name, url=url, active=self.current_lang == code)
+
+                if self.toolbar.edit_mode_active:
+                    add = [l for l in languages.items() if l not in remove]
+                    copy = [(code, name) for code, name in languages.items() if code != self.current_lang and (code, name) in remove]
+
+                    if (add or len(remove) > 1 or copy) and change_service_perm:
+                        self._language_menu.add_break(ADD_OBJ_LANGUAGE_BREAK)
+
+                        if add:
+                            add_plugins_menu = self._language_menu.get_or_create_menu('{0}-add-trans'.format(LANGUAGE_MENU_IDENTIFIER), _('Add Translation'))
+                            for code, name in add:
+                                url_args = {}
+                                url = '%s?language=%s' % (get_admin_url('js_services_service_change',
+                                    [obj.pk], **url_args), code)
+                                add_plugins_menu.add_modal_item(name, url=url)
+
+                        if len(remove) > 1:
+                            remove_plugins_menu = self._language_menu.get_or_create_menu('{0}-del-trans'.format(LANGUAGE_MENU_IDENTIFIER), _('Delete Translation'))
+                            for code, name in remove:
+                                url = get_admin_url('js_services_service_delete_translation', [obj.pk, code])
+                                remove_plugins_menu.add_modal_item(name, url=url)
+
+                        if copy:
+                            copy_plugins_menu = self._language_menu.get_or_create_menu('{0}-copy-trans'.format(LANGUAGE_MENU_IDENTIFIER), _('Copy all plugins'))
+                            title = _('from %s')
+                            question = _('Are you sure you want to copy all plugins from %s?')
+                            url = get_admin_url('js_services_service_copy_language', [obj.pk])
+                            for code, name in copy:
+                                copy_plugins_menu.add_ajax_item(
+                                    title % name, action=url,
+                                    data={'source_language': code, 'target_language': self.current_lang},
+                                    question=question % name, on_success=self.toolbar.REFRESH_PAGE
+                                )
