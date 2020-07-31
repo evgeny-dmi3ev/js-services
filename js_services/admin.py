@@ -173,7 +173,7 @@ class ServiceAdminForm(CustomFieldsFormMixin, TranslatableModelForm):
 
     def get_custom_fields(self):
         fields = {}
-        if self.instance:
+        if self.instance and self.instance.pk:
             for section in self.instance.sections.all():
                 if section.custom_fields_settings:
                     fields.update(section.custom_fields_settings)
@@ -185,7 +185,7 @@ class ServiceAdmin(
     AllTranslationsMixin,
     PlaceholderAdminMixin,
     FrontendEditableAdminMixin,
-    ModelAppHookConfig,
+    #ModelAppHookConfig,
     TranslatableAdmin
 ):
     search_fields = ['translations__title']
