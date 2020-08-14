@@ -40,12 +40,14 @@ except:
     class CustomFieldsFormMixin(object):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
-            self.fields['custom_fields'].widget = forms.HiddenInput()
+            if 'custom_fields' in self.fields:
+                self.fields['custom_fields'].widget = forms.HiddenInput()
 
     class CustomFieldsSettingsFormMixin(object):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
-            self.fields['custom_fields_settings'].widget = forms.HiddenInput()
+            if 'custom_fields_settings' in self.fields:
+                self.fields['custom_fields_settings'].widget = forms.HiddenInput()
 
 from . import models
 
@@ -56,6 +58,8 @@ from .constants import (
     SERVICES_ENABLE_IMAGE,
     IS_THERE_COMPANIES,
     TRANSLATE_IS_PUBLISHED,
+    SERVICE_CUSTOM_FIELDS,
+    SERVICE_SECTION_CUSTOM_FIELDS,
 )
 if IS_THERE_COMPANIES:
     from js_companies.models import Company
@@ -172,7 +176,7 @@ class ServiceAdminForm(CustomFieldsFormMixin, TranslatableModelForm):
             del self.fields['companies']
 
     def get_custom_fields(self):
-        fields = {}
+        fields = SERVICE_CUSTOM_FIELDS
         if self.instance and self.instance.pk:
             for section in self.instance.sections.all():
                 if section.custom_fields_settings:
@@ -361,8 +365,8 @@ class ServiceAdmin(
 
 admin.site.register(models.Service, ServiceAdmin)
 
-class ServicesConfigAdminForm(CustomFieldsSettingsFormMixin, TranslatableModelForm):
-    pass
+class ServicesConfigAdminForm(CustomFieldsFormMixin, CustomFieldsSettingsFormMixin, TranslatableModelForm):
+    custom_fields = SERVICE_SECTION_CUSTOM_FIELDS
 
 class ServicesConfigAdmin(
     AllTranslationsMixin,
@@ -378,7 +382,7 @@ class ServicesConfigAdmin(
             'template_prefix', 'paginate_by', 'pagination_pages_start',
             'pagination_pages_visible', 'exclude_featured',
             'search_indexed', 'config.default_published',
-            'custom_fields_settings')
+            'custom_fields_settings', 'custom_fields')
 
     #def get_readonly_fields(self, request, obj=None):
         #return self.readonly_fields

@@ -126,7 +126,7 @@ class AppHookCheckMixin(object):
         return qs#.translated(*self.valid_languages)
 
 
-class ServiceDetail(AppConfigMixin, AppHookCheckMixin, EditModeMixin,
+class ServiceDetail(AppConfigMixin, AppHookCheckMixin, PreviewModeMixin,
                     TranslatableSlugMixin, TemplatePrefixMixin, DetailView):
     model = Service
     slug_field = 'slug'

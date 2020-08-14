@@ -62,6 +62,16 @@ SITEMAP_PRIORITY = getattr(
     'SERVICES_SITEMAP_PRIORITY',
     0.5,
 )
+SERVICE_CUSTOM_FIELDS = getattr(
+    settings,
+    'SERVICES_SERVICE_CUSTOM_FIELDS',
+    {},
+)
+SERVICE_SECTION_CUSTOM_FIELDS = getattr(
+    settings,
+    'SERVICES_SERVICE_SECTION_CUSTOM_FIELDS',
+    {},
+)
 try:
     IS_THERE_COMPANIES = True
     from js_companies.models import Company

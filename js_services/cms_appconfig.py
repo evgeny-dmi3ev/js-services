@@ -100,6 +100,7 @@ class ServicesConfig(TranslatableModel, AppHookConfig):
         help_text=_('Include services in search indexes?'),
     )
     custom_fields_settings = JSONField(blank=True, null=True)
+    custom_fields = JSONField(blank=True, null=True)
 
     def get_app_title(self):
         return getattr(self, 'app_title', _('untitled'))
