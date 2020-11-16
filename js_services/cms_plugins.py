@@ -45,9 +45,9 @@ class RelatedServicesPlugin(CMSPluginBase):
         if not qs.exists():
             qs = models.Service.objects.published().distinct()
             if related_sections.exists():
-                qs = qs.filter(sections=related_sections)
+                qs = qs.filter(sections__in=related_sections)
             if related_people.exists():
-                qs = qs.filter(person_set=related_people)
+                qs = qs.filter(person__in=related_people)
             if IS_THERE_COMPANIES and related_companies.exists():
                 qs = qs.filter(companies__in=related_companies)
             if related_categories.exists():
