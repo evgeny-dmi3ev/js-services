@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from django.conf import settings
+from django.utils.text import slugify
 
 UPDATE_SEARCH_DATA_ON_SAVE = getattr(
     settings,
@@ -72,6 +73,16 @@ SERVICE_SECTION_CUSTOM_FIELDS = getattr(
     'SERVICES_SERVICE_SECTION_CUSTOM_FIELDS',
     {},
 )
+SERVICE_LAYOUTS = getattr(
+    settings,
+    'SERVICES_SERVICE_LAYOUTS',
+    (),
+)
+SERVICE_LAYOUT_CHOICES = list(SERVICE_LAYOUTS)
+if len(SERVICE_LAYOUTS) == 0 or len(SERVICE_LAYOUTS[0]) != 2:
+    SERVICE_LAYOUT_CHOICES = zip(list(map(lambda s: slugify(s).replace('-', '_'), ('',) + SERVICE_LAYOUTS)), ('default',) + SERVICE_LAYOUTS)
+else:
+    SERVICE_LAYOUT_CHOICES.insert(0, ('', 'default'))
 try:
     IS_THERE_COMPANIES = True
     from js_companies.models import Company

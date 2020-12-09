@@ -60,6 +60,7 @@ from .constants import (
     TRANSLATE_IS_PUBLISHED,
     SERVICE_CUSTOM_FIELDS,
     SERVICE_SECTION_CUSTOM_FIELDS,
+    SERVICE_LAYOUT_CHOICES,
 )
 if IS_THERE_COMPANIES:
     from js_companies.models import Company
@@ -128,6 +129,7 @@ make_not_featured.short_description = _(
 
 class ServiceAdminForm(CustomFieldsFormMixin, TranslatableModelForm):
     companies = forms.CharField()
+    layout = forms.ChoiceField(choices=SERVICE_LAYOUT_CHOICES, required=False)
 
     custom_fields = 'get_custom_fields'
 

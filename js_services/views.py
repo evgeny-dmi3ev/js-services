@@ -217,6 +217,10 @@ class ServiceDetail(AppConfigMixin, AppHookCheckMixin, PreviewModeMixin,
 
         return context
 
+    @property
+    def template_name_suffix(self):
+        return '_%s' %  (self.object.layout or 'detail')
+
     def get_prev_object(self, queryset=None, object=None):
         if SERVICES_GET_NEXT_SERVICE:
             if queryset is None:
