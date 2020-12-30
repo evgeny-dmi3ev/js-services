@@ -151,6 +151,12 @@ class Service(CustomServiceMixin,
         max_length=255,
         verbose_name=_('Canonical URL')
     )
+    layout = models.CharField(
+        blank=True,
+        default='',
+        max_length=60,
+        verbose_name=_('layout')
+    )
     custom_fields = JSONField(blank=True, null=True)
 
     # Setting "symmetrical" to False since it's a bit unexpected that if you
