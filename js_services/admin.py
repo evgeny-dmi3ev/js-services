@@ -228,6 +228,7 @@ class ServiceAdmin(
         )
     settings_fields += (
         'lead_in',
+        'layout',
         'custom_fields',
     )
 
