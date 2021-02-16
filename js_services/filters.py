@@ -12,6 +12,7 @@ from .constants import (
     IS_THERE_COMPANIES,
     ADD_FILTERED_CATEGORIES,
     ADDITIONAL_EXCLUDE,
+    FILTER_EMPTY_LABELS,
 )
 if IS_THERE_COMPANIES:
     from js_companies.models import Company
@@ -47,20 +48,29 @@ class ServiceFilters(CustomFilterMixin, django_filters.FilterSet):
 
     def __init__(self, values, *args, **kwargs):
         super(ServiceFilters, self).__init__(values, *args, **kwargs)
-        self.sort_choices(self.filters['service'])
-        self.sort_choices(self.filters['category'])
-        self.sort_choices(self.filters['section'])
         if UPDATE_SEARCH_DATA_ON_SAVE:
             self.filters['q'] = SearchFilter(label='Search the directory')
+        selects = ['category', 'service', 'section']
         if IS_THERE_COMPANIES:
-            self.filters['company'] = django_filters.ModelChoiceFilter('companies', label='company', queryset=Company.objects.exclude(**ADDITIONAL_EXCLUDE.get('company', {})).order_by('name'))
-            self.filters['company'].extra.update({'empty_label': 'by company'})
+            self.filters['company'] = django_filters.ModelChoiceFilter('companies', label='company', empty_label='by company', queryset=Company.objects.exclude(**ADDITIONAL_EXCLUDE.get('company', {})).order_by('name'))
+            selects.append('company')
         if ADD_FILTERED_CATEGORIES:
             for category in ADD_FILTERED_CATEGORIES:
                 qs = Category.objects.filter(translations__slug=category[0])[0].get_children().exclude(**ADDITIONAL_EXCLUDE.get(category[0], {})).order_by('translations__name') if Category.objects.filter(translations__slug=category[0]).exists() else Category.objects.none()
                 name = category[0].replace('-', '_')
                 self.filters[name] = django_filters.ModelChoiceFilter('categories', label=category[1], queryset=qs)
-                self.filters[name].extra.update({'empty_label': category[1]})
+                self.filters[name].extra.update({'empty_label': 'by %s' % category[1]})
+                selects.append(name)
+
+        self.set_empty_labels(**FILTER_EMPTY_LABELS)
+
+        for field in selects:
+            self.sort_choices(self.filters[field])
+
+    def set_empty_labels(self, **kwargs):
+        for key, value in kwargs.items():
+            if key in self.filters:
+                self.filters[key].extra['empty_label'] = value
 
     def sort_choices(self, field):
         field = field.field

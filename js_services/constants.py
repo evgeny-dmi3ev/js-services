@@ -83,6 +83,17 @@ if len(SERVICE_LAYOUTS) == 0 or len(SERVICE_LAYOUTS[0]) != 2:
     SERVICE_LAYOUT_CHOICES = zip(list(map(lambda s: slugify(s).replace('-', '_'), ('',) + SERVICE_LAYOUTS)), ('default',) + SERVICE_LAYOUTS)
 else:
     SERVICE_LAYOUT_CHOICES.insert(0, ('', 'default'))
+
+FILTER_EMPTY_LABELS = getattr(
+    settings,
+    'SEARCH_FILTER_EMPTY_LABELS',
+    {}
+)
+FILTER_EMPTY_LABELS.update(getattr(
+    settings,
+    'SERVICES_FILTER_EMPTY_LABELS',
+    {}
+))
 try:
     IS_THERE_COMPANIES = True
     from js_companies.models import Company
