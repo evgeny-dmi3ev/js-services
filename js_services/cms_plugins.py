@@ -43,16 +43,23 @@ class RelatedServicesPlugin(CMSPluginBase):
         related_categories = instance.related_categories.all()
 
         if not qs.exists():
+            selected = False
             qs = models.Service.objects.published().distinct()
             if related_sections.exists():
+                selected = True
                 qs = qs.filter(sections__in=related_sections)
             if related_people.exists():
+                selected = True
                 qs = qs.filter(person__in=related_people)
             if IS_THERE_COMPANIES and related_companies.exists():
+                selected = True
                 qs = qs.filter(companies__in=related_companies)
             if related_categories.exists():
+                selected = True
                 qs = qs.filter(categories__in=related_categories)
-
+            if not selected:
+                qs = models.Service.objects.none()
+        context['related_services_all'] = qs
         context['related_services'] = qs[:int(instance.count)]
 
         return context
