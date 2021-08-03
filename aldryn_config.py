@@ -27,17 +27,12 @@ class Form(forms.BaseForm):
 
     def to_settings(self, data, settings):
 
-        if data['hide_related_services']:
-            settings['SERVICES_HIDE_RELATED_SERVICES'] = int(data['hide_related_services'])
-        if data['summary_richtext']:
-            settings['SERVICES_SUMMARY_RICHTEXT'] = int(data['summary_richtext'])
-        if data['enable_pubdate']:
-            settings['SERVICES_ENABLE_PUBDATE'] = int(data['enable_pubdate'])
-        if data['enable_image']:
-            settings['SERVICES_ENABLE_IMAGE'] = int(data['enable_image'])
+        settings['SERVICES_HIDE_RELATED_SERVICES'] = int(data['hide_related_services'])
+        settings['SERVICES_SUMMARY_RICHTEXT'] = int(data['summary_richtext'])
+        settings['SERVICES_ENABLE_PUBDATE'] = int(data['enable_pubdate'])
+        settings['SERVICES_ENABLE_IMAGE'] = int(data['enable_image'])
+        settings['SERVICES_TRANSLATE_IS_PUBLISHED'] = int(data['translate_is_published'])
         if data['related_templates']:
             settings['SERVICES_RELATED_SERVICES_LAYOUTS'] = data['related_templates'].split(',')
-        if data['translate_is_published']:
-            settings['SERVICES_TRANSLATE_IS_PUBLISHED'] = int(data['translate_is_published'])
 
         return settings
