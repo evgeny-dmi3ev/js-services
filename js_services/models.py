@@ -42,6 +42,7 @@ from .constants import (
     IS_THERE_COMPANIES,
     SERVICES_ENABLE_PUBDATE,
     TRANSLATE_IS_PUBLISHED,
+    ADD_CATEGORIES_TO_SEARCH_DATA,
 )
 
 try:
@@ -285,9 +286,10 @@ class Service(CustomServiceMixin,
         title = self.safe_translation_getter('title', '')
         description = self.safe_translation_getter('lead_in', '')
         text_bits = [title, strip_tags(description)]
-        for category in self.categories.all():
-            text_bits.append(
-                force_unicode(category.safe_translation_getter('name')))
+        if ADD_CATEGORIES_TO_SEARCH_DATA:
+            for category in self.categories.all():
+                text_bits.append(
+                    force_unicode(category.safe_translation_getter('name')))
         if self.content:
             plugins = self.content.cmsplugin_set.filter(language=language)
             for base_plugin in plugins:
