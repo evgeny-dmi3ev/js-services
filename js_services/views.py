@@ -31,7 +31,11 @@ from aldryn_newsblog.utils import add_prefix_to_path
 from .cms_appconfig import ServicesConfig
 from .models import Service
 from .filters import ServiceFilters
-from .constants import SERVICES_GROUP_BY_SECTIONS, SERVICES_GET_NEXT_SERVICE
+from .constants import (
+    SERVICES_GROUP_BY_SECTIONS,
+    SERVICES_GET_NEXT_SERVICE,
+    TRANSLATE_LAYOUT,
+)
 
 
 class FilterFormMixin(object):
@@ -219,7 +223,10 @@ class ServiceDetail(AppConfigMixin, AppHookCheckMixin, PreviewModeMixin,
 
     @property
     def template_name_suffix(self):
-        return '_%s' %  (self.object.layout or 'detail')
+        if TRANSLATE_LAYOUT:
+            return '_%s' %  (self.object.layout_trans or 'detail')
+        else:
+            return '_%s' %  (self.object.layout or 'detail')
 
     def get_prev_object(self, queryset=None, object=None):
         if SERVICES_GET_NEXT_SERVICE:

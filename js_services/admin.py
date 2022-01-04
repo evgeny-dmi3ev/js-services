@@ -58,6 +58,7 @@ from .constants import (
     SERVICES_ENABLE_IMAGE,
     IS_THERE_COMPANIES,
     TRANSLATE_IS_PUBLISHED,
+    TRANSLATE_LAYOUT,
     SERVICE_CUSTOM_FIELDS,
     SERVICE_SECTION_CUSTOM_FIELDS,
     SERVICE_LAYOUT_CHOICES,
@@ -130,6 +131,7 @@ make_not_featured.short_description = _(
 class ServiceAdminForm(CustomFieldsFormMixin, TranslatableModelForm):
     companies = forms.CharField()
     layout = forms.ChoiceField(choices=SERVICE_LAYOUT_CHOICES, required=False)
+    layout_trans = forms.ChoiceField(choices=SERVICE_LAYOUT_CHOICES, required=False)
 
     custom_fields = 'get_custom_fields'
 
@@ -300,6 +302,8 @@ class ServiceAdmin(
                 fields = []
                 for field in fieldset[1]['fields']:
                     if field  in ['is_published', 'is_featured'] and TRANSLATE_IS_PUBLISHED:
+                        field += '_trans'
+                    if field  == 'layout' and TRANSLATE_LAYOUT:
                         field += '_trans'
                     fields.append(field)
                 fieldset[1]['fields'] = fields

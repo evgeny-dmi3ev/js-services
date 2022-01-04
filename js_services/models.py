@@ -112,6 +112,12 @@ class Service(CustomServiceMixin,
             default=False, db_index=True),
         is_featured_trans = models.BooleanField(_('is featured'),
             default=False, db_index=True),
+        layout_trans = models.CharField(
+            blank=True,
+            default='',
+            max_length=60,
+            verbose_name=_('layout')
+        ),
     )
 
     content = PlaceholderField('service_content',

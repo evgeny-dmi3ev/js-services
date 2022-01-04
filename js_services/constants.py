@@ -38,6 +38,11 @@ TRANSLATE_IS_PUBLISHED = getattr(
     'SERVICES_TRANSLATE_IS_PUBLISHED',
     False,
 )
+TRANSLATE_LAYOUT = getattr(
+    settings,
+    'SERVICES_TRANSLATE_LAYOUT',
+    False,
+)
 ADD_FILTERED_CATEGORIES = getattr(
     settings,
     'SERVICES_ADD_FILTERED_CATEGORIES',
