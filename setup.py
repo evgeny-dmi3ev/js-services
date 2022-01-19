@@ -13,7 +13,6 @@ REQUIREMENTS = [
     'djangocms-text-ckeditor',
     'easy-thumbnails',
     'six',
-    'djangocms_icon==1.3.0',
     'django-filter',
     'django-crispy-forms',
 ]

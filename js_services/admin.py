@@ -202,6 +202,8 @@ class ServiceAdmin(
     list_display = ('title', 'slug', 'is_featured',
                     'is_published')
     list_filter = [
+        'is_published',
+        'is_featured',
         'sections',
         'categories',
     ]
