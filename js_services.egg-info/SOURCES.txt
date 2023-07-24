@@ -1,6 +1,7 @@
 LICENSE
 MANIFEST.in
 README.rst
+setup.cfg
 setup.py
 js_services/__init__.py
 js_services/admin.py

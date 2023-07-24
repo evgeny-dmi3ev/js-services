@@ -22,7 +22,6 @@ from django.contrib.postgres.fields import JSONField
 from django.db import connection, models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.utils.encoding import python_2_unicode_compatible
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import override, ugettext
@@ -61,7 +60,7 @@ except:
         pass
 
 
-@python_2_unicode_compatible
+
 class Service(CustomServiceMixin,
               TranslatedAutoSlugifyMixin,
               TranslationHelperMixin,
@@ -354,36 +353,36 @@ class Service(CustomServiceMixin,
         return Person.objects.published().filter(services__in=self.related.all()).distinct()
 
 
-    def __getattr__(cls, name):
-        if not hasattr(Service, name):
-            if name.startswith('related_articles_'):
-                category = name.split('related_articles_')[1].replace('_', '-')
-                def wrapper(self):
-                    return self.related_articles(category)
-                setattr(Service, name, wrapper)
-                return getattr(cls, name)
-            elif name.startswith('services_by_category_'):
-                category = name.split('services_by_category_')[1].replace('_', '-')
-                def wrapper(self):
-                    return self.services_by_category(category)
-                setattr(Service, name, wrapper)
-                return getattr(cls, name)
-            elif name.startswith('related_categories_'):
-                category = name.split('related_categories_')[1].replace('_', '-')
-                def wrapper(self):
-                    return self.related_categories(category)
-                setattr(Service, name, wrapper)
-                return getattr(cls, name)
-            elif name.startswith('services_'):
-                category = name.split('services_')[1].replace('_', '-')
-                def wrapper(self):
-                    return self.services(category)
-                setattr(Service, name, wrapper)
-                return getattr(cls, name)
-        raise AttributeError
+    # def __getattr__(cls, name):
+        # if not hasattr(Service, name):
+            # if name.startswith('related_articles_'):
+                # category = name.split('related_articles_')[1].replace('_', '-')
+                # def wrapper(self):
+                    # return self.related_articles(category)
+                # setattr(Service, name, wrapper)
+                # return getattr(cls, name)
+            # elif name.startswith('services_by_category_'):
+                # category = name.split('services_by_category_')[1].replace('_', '-')
+                # def wrapper(self):
+                    # return self.services_by_category(category)
+                # setattr(Service, name, wrapper)
+                # return getattr(cls, name)
+            # elif name.startswith('related_categories_'):
+                # category = name.split('related_categories_')[1].replace('_', '-')
+                # def wrapper(self):
+                    # return self.related_categories(category)
+                # setattr(Service, name, wrapper)
+                # return getattr(cls, name)
+            # elif name.startswith('services_'):
+                # category = name.split('services_')[1].replace('_', '-')
+                # def wrapper(self):
+                    # return self.services(category)
+                # setattr(Service, name, wrapper)
+                # return getattr(cls, name)
+        # raise AttributeError
 
 
-@python_2_unicode_compatible
+
 class RelatedServicesPlugin(CMSPlugin):
 
     # NOTE: This one does NOT subclass NewsBlogCMSPlugin. This is because this
@@ -428,9 +427,12 @@ def update_search_data(sender, instance, **kwargs):
     if Service.update_search_on_save and is_cms_plugin:
         placeholder = (getattr(instance, '_placeholder_cache', None) or
                        instance.placeholder)
-        if hasattr(placeholder, '_attached_model_cache'):
-            if placeholder._attached_model_cache == Service and placeholder.slot == 'content':
-                service = placeholder._attached_model_cache.objects.language(
-                    instance.language).get(content=placeholder.pk)
-                service.search_data = service.get_search_data(instance.language)
-                service.save()
+        if hasattr(placeholder, '_attached_model_cache') and hasattr(placeholder, '_attached_field_cache'):
+            field = placeholder._attached_field_cache
+            model = placeholder._attached_model_cache
+            if field and model == Service:
+                placeholder.clear_cache(instance.language)
+                filters = {}
+                filters[field.name] = placeholder.pk
+                obj = model.objects.language(instance.language).get(**filters)
+                obj.save()

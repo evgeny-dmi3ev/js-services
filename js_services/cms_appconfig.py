@@ -10,7 +10,6 @@ from django import forms
 from django.conf import settings
 from django.contrib.postgres.fields import JSONField
 from django.db import models
-from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 from parler.models import TranslatableModel, TranslatedFields
 
@@ -34,7 +33,7 @@ TEMPLATE_PREFIX_CHOICES = getattr(
     settings, 'SERVICES_TEMPLATE_PREFIXES', [])
 
 
-@python_2_unicode_compatible
+
 class ServicesConfig(TranslatableModel, AppHookConfig):
     """Adds some translatable, per-app-instance fields."""
     translations = TranslatedFields(

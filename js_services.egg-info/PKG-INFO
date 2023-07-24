@@ -1,15 +1,13 @@
-Metadata-Version: 1.0
+Metadata-Version: 2.1
 Name: js-services
-Version: 0.5.17
-Summary: Jumpsuite Services
-====
-Addon description
-
-
-
+Version: 0.6.2
+Summary: Jumpsuite Services ==== Addon description   
 Home-page: UNKNOWN
 Author: Compound Partners Ltd
 Author-email: hello@compoundpartners.co.uk
 License: UNKNOWN
-Description: UNKNOWN
 Platform: OS Independent
+License-File: LICENSE
+
+UNKNOWN
+

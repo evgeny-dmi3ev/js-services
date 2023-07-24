@@ -20,6 +20,7 @@ from django.views.decorators.http import require_POST
 from django.utils.translation import ugettext_lazy as _
 from django.utils.decorators import method_decorator
 from django.utils.encoding import force_text
+from django.utils.html import mark_safe
 from django.core.exceptions import PermissionDenied
 from django.http import (
     HttpResponseRedirect,
@@ -338,6 +339,9 @@ class ServiceAdmin(
             site = get_current_site()
         return site
 
+    def all_translations(self, object):
+        return mark_safe(super().all_translations(object))
+
     @require_POST
     @transaction.atomic
     def copy_language(self, request, obj_id):
@@ -395,5 +399,9 @@ class ServicesConfigAdmin(
 
     #def get_readonly_fields(self, request, obj=None):
         #return self.readonly_fields
+
+    def all_translations(self, object):
+        return mark_safe(super().all_translations(object))
+
 
 admin.site.register(models.ServicesConfig, ServicesConfigAdmin)

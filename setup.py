@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 from js_services import __version__
 
 REQUIREMENTS = [
-    'Django>=1.8,<3.0',
+    'Django>=1.8',
     'aldryn-boilerplates',
     'aldryn-common>=0.1.3',
     'aldryn-translation-tools>=0.1.0',
