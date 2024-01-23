@@ -391,7 +391,8 @@ class ServicesConfigAdmin(
 
     def get_config_fields(self):
         return (
-            'app_title', 'allow_post', 'permalink_type', 'non_permalink_handling',
+            'app_title', 'allow_post', 'is_featured', 
+            'permalink_type', 'non_permalink_handling',
             'template_prefix', 'paginate_by', 'pagination_pages_start',
             'pagination_pages_visible', 'exclude_featured',
             'search_indexed', 'config.default_published',

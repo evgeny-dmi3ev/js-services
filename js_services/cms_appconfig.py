@@ -44,6 +44,11 @@ class ServicesConfig(TranslatableModel, AppHookConfig):
         _('Allow POST requests'),
         default=False,
     )
+    is_featured = models.BooleanField(
+        _('is featured'), 
+        default=False,
+        db_index=True
+    )
     permalink_type = models.CharField(
         _('permalink type'), max_length=8,
         blank=False, default='slug', choices=PERMALINK_CHOICES,
