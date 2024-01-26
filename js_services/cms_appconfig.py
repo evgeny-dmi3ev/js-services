@@ -13,6 +13,8 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from parler.models import TranslatableModel, TranslatedFields
 
+from .constants import TRANSLATE_IS_PUBLISHED
+
 PERMALINK_CHOICES = (
     ('s', _('the-eagle-has-landed/', )),
     ('ys', _('1969/the-eagle-has-landed/', )),
@@ -119,6 +121,12 @@ class ServicesConfig(TranslatableModel, AppHookConfig):
     default_namespace = 'all-services'
     default_app_title = 'All services'
 
+    @property
+    def services_featured(self):
+        if TRANSLATE_IS_PUBLISHED:
+            return self.services.filter(is_featured_trans=True)
+        else:
+            return self.services.filter(is_featured=True)
 
 
 class ServicesConfigForm(AppDataForm):

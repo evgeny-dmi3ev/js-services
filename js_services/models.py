@@ -228,6 +228,13 @@ class Service(CustomServiceMixin,
         return is_published
 
     @property
+    def featured(self):
+        language = get_current_language()
+        if TRANSLATE_IS_PUBLISHED:
+            return self.safe_translation_getter('is_featured_trans', language_code=language, any_language=False) or False
+        return self.is_featured
+
+    @property
     def future(self):
         """
         Returns True if the service is published but is scheduled for a

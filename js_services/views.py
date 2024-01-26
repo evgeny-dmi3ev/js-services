@@ -43,6 +43,19 @@ from .constants import (
     USE_CACHE,
 )
 
+class NoneMixin(object):
+    pass
+
+try:
+    from custom.js_services.views import CustomListMixin
+except:
+    CustomListMixin = NoneMixin
+try:
+    from custom.js_services.views import CustomDetailMixin
+except:
+    CustomDetailMixin = NoneMixin
+
+
 
 class CachedMixin():
     def use_cache(self, request):
@@ -84,14 +97,20 @@ class CachedMixin():
         return response
 
 
-class FilterFormMixin(object):
+class ServiceFilterMixin(FilterMixin):
 
-    def get_context_data(self, **kwargs):
-        data = super(FilterFormMixin, self).get_context_data(**kwargs)
-        qs = data['object_list'] if 'object_list' in data else Service.objects.none()
-        data['filter'] = ServiceFilters(
-            self.request.GET, queryset=qs)
-        return data
+    def get(self, request, *args, **kwargs):
+        self.filterset = ServiceFilters(self.request.GET, queryset=self.get_queryset())
+
+        if not self.filterset.is_bound or self.filterset.is_valid() or not self.get_strict():
+            self.object_list = self.filterset.qs
+        else:
+            self.object_list = self.filterset.queryset.none()
+
+        context = self.get_context_data(filter=self.filterset,
+                                        object_list=self.object_list)
+        return self.render_to_response(context)
+
 
 class GroupServicesMixin(object):
 
@@ -179,7 +198,7 @@ class AppHookCheckMixin(object):
         return qs#.translated(*self.valid_languages)
 
 
-class ServiceDetail(CachedMixin, AppConfigMixin, AppHookCheckMixin, PreviewModeMixin,
+class ServiceDetail(CustomDetailMixin, CachedMixin, AppConfigMixin, AppHookCheckMixin, PreviewModeMixin,
                     TranslatableSlugMixin, TemplatePrefixMixin, DetailView):
     model = Service
     slug_field = 'slug'
@@ -355,7 +374,7 @@ class ServiceListBase(AppConfigMixin, AppHookCheckMixin, TemplatePrefixMixin,
         return context
 
 
-class ServiceList(GroupServicesMixin, FilterMixin, ServiceListBase):
+class ServiceList(CustomListMixin, GroupServicesMixin, ServiceFilterMixin, ServiceListBase):
     """A complete list of services."""
     show_header = True
 
@@ -375,33 +394,10 @@ class ServiceList(GroupServicesMixin, FilterMixin, ServiceListBase):
             qs = qs.exclude(pk__in=exclude_featured)
         return qs
 
-    def get(self, request, *args, **kwargs):
-        self.filterset = ServiceFilters(self.request.GET, queryset=self.get_queryset())
 
-        if not self.filterset.is_bound or self.filterset.is_valid() or not self.get_strict():
-            self.object_list = self.filterset.qs
-        else:
-            self.object_list = self.filterset.queryset.none()
-
-        context = self.get_context_data(filter=self.filterset,
-                                        object_list=self.object_list)
-        return self.render_to_response(context)
-
-
-class ServiceFilteredList(GroupServicesMixin, FilterMixin, ServiceListBase):
+class ServiceFilteredList(CustomListMixin, GroupServicesMixin, ServiceFilterMixin, ServiceListBase):
     template_name = 'js_services/service_list.html'
 
-    def get(self, request, *args, **kwargs):
-        self.filterset = ServiceFilters(self.request.GET, queryset=self.get_queryset())
-
-        if not self.filterset.is_bound or self.filterset.is_valid() or not self.get_strict():
-            self.object_list = self.filterset.qs
-        else:
-            self.object_list = self.filterset.queryset.none()
-
-        context = self.get_context_data(filter=self.filterset,
-                                        object_list=self.object_list)
-        return self.render_to_response(context)
 
 class ServiceSearchResultsList(ServiceListBase):
     model = Service
