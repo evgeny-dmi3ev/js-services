@@ -396,6 +396,7 @@ class ServicesConfigAdmin(
             'template_prefix', 'paginate_by', 'pagination_pages_start',
             'pagination_pages_visible', 'exclude_featured',
             'search_indexed', 'config.default_published',
+            'show_in_search_filters', 'show_services_in_search_filters',
             'custom_fields_settings', 'custom_fields')
 
     #def get_readonly_fields(self, request, obj=None):

@@ -105,6 +105,8 @@ class ServicesConfig(TranslatableModel, AppHookConfig):
         default=True,
         help_text=_('Include services in search indexes?'),
     )
+    show_in_search_filters = models.BooleanField(_('Show section in search filters'), null=False, default=True)
+    show_services_in_search_filters = models.BooleanField(_('Show services in search filters'), null=False, default=True)
     custom_fields_settings = JSONField(blank=True, null=True)
     custom_fields = JSONField(blank=True, null=True)
 

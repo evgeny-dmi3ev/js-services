@@ -37,9 +37,9 @@ class SearchFilter(django_filters.Filter):
 
 class ServiceFilters(CustomFilterMixin, django_filters.FilterSet):
     q = django_filters.CharFilter('translations__title', 'icontains', label='Search the directory')
-    service = django_filters.ModelChoiceFilter('related', label='service', empty_label='by service', queryset=models.Service.objects.published().exclude(**ADDITIONAL_EXCLUDE.get('service', {})))
+    service = django_filters.ModelChoiceFilter('related', label='service', empty_label='by service', queryset=models.Service.objects.published().filter(sections__show_services_in_search_filters=True).exclude(**ADDITIONAL_EXCLUDE.get('service', {})))
     category = django_filters.ModelChoiceFilter('categories', label='category', empty_label='by category', queryset=Category.objects.exclude(**ADDITIONAL_EXCLUDE.get('category', {})))
-    section = django_filters.ModelChoiceFilter('sections', label='section', empty_label='by section', queryset=ServicesConfig.objects.exclude(namespace=ServicesConfig.default_namespace).exclude(**ADDITIONAL_EXCLUDE.get('section', {})))
+    section = django_filters.ModelChoiceFilter('sections', label='section', empty_label='by section', queryset=ServicesConfig.objects.filter(show_in_search_filters=True).exclude(namespace=ServicesConfig.default_namespace).exclude(**ADDITIONAL_EXCLUDE.get('section', {})))
     letter = django_filters.CharFilter('translations__title', 'istartswith')
 
     class Meta:
